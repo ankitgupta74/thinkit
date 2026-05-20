@@ -16,6 +16,12 @@ Project structure initialization completed.
 - added placeholder pages for routing setup
 - added customer shared layout structure
 - added global toaster configuration
+- implemented responsive authentication page UI
+- added split-screen login layout with hero section
+- added login/register mode switching
+- added reusable controlled auth form state handling
+- integrated loading states and submission flow
+- added icon-based form inputs using lucide-react
 
 ---
 
@@ -123,3 +129,23 @@ Examples:
 Layouts wrap child pages automatically.
 
 ---
+
+## Authentication UI progress
+
+Implemented authentication flow foundation using App Router.
+
+Current auth features:
+
+- split-screen responsive authentication layout
+- left-side grocery hero section
+- login and signup mode switching
+- controlled form inputs using React state
+- loading state handling
+- icon-supported input fields
+- reusable form structure for backend integration
+
+Route:
+
+```bash
+/login
+```
