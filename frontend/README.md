@@ -369,3 +369,51 @@ Current approach:
 - avoid repeated static UI blocks
 - centralize section content into structured data
 - maintain scalable landing page composition
+
+---
+
+## Categories section progress
+
+Reusable homepage categories section added and integrated into customer landing page.
+
+Location:
+
+```bash
+components/
+└── home/
+    └── Categories.tsx
+```
+
+Integrated into:
+
+```bash
+app/
+└── (customer)/
+    └── page.tsx
+```
+
+Current features:
+
+- reusable categories section component
+- category cards generated using mapped data structure
+- horizontal scrollable category browsing layout
+- category image integration using Next.js Image
+- dynamic category-based navigation routes
+- hover interaction states for category items
+- responsive category card sizing
+
+Current techniques used:
+
+- client component using `"use client"`
+- array mapping for UI generation
+- Next.js Image optimization
+- App Router Link navigation
+- browser event handling
+- utility-first responsive styling
+
+Current approach:
+
+- keep homepage sections modular
+- centralize category data into structured objects
+- avoid repeated static category markup
+- support scalable content-driven rendering

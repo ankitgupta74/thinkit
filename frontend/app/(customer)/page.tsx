@@ -1,3 +1,4 @@
+import Categories from "@/components/home/Categories";
 import Features from "@/components/home/Features";
 import Hero from "@/components/home/Hero";
 
@@ -6,6 +7,7 @@ function Home() {
     <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <Hero />
       <Features />
+      <Categories />
     </div>
   )
 }
