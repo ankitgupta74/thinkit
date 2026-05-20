@@ -1,7 +1,9 @@
+import Hero from "@/components/home/Hero";
+
 function Home() {
   return (
-    <div>
-      Default/Home Page
+    <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <Hero />
     </div>
   )
 }

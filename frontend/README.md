@@ -275,3 +275,51 @@ Current menu states:
 - authenticated user menu
 - guest menu
 - admin-specific actions
+
+---
+
+## Home page progress
+
+Customer landing page foundation added using a reusable Hero component.
+
+Location:
+
+```bash
+components/
+└── home/
+    └── Hero.tsx
+
+Integrated into:
+
+```bash
+app/
+└── (customer)/
+    └── page.tsx
+```
+
+Current hero features:
+
+- reusable hero section component
+- full-width background image using Next.js Image
+- gradient overlay for text readability
+- responsive typography and layout structure
+- primary and secondary call-to-action buttons
+- icon integration using lucide-react
+- optimized image rendering
+- centralized landing content structure
+
+Current techniques used:
+
+- reusable component composition
+- Next.js Image optimization
+- responsive utility-first styling
+- layered positioning with overlays
+- App Router page composition
+- Link-based navigation handling
+
+Current approach:
+
+- keep page files lightweight
+- move reusable UI into isolated components
+- separate presentation from route structure
+- create scalable homepage section architecture
