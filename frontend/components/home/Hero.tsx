@@ -12,6 +12,8 @@ function Hero() {
         src='/assets/hero_bg.jpeg'
         alt='Hero Section'
         fill
+        priority
+        loading='eager'
         className='object-cover'
       />
       <div className="absolute inset-0 bg-linear-to-r from-app-green via-app-green/65 to-transparent" />

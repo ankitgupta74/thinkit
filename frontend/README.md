@@ -323,3 +323,49 @@ Current approach:
 - move reusable UI into isolated components
 - separate presentation from route structure
 - create scalable homepage section architecture
+
+---
+
+## Features section progress
+
+Reusable homepage feature highlights section added and integrated into customer landing page.
+
+Location:
+
+```bash
+components/
+└── home/
+    └── Features.tsx
+```
+
+Integrated into:
+
+```bash
+app/
+└── (customer)/
+    └── page.tsx
+```
+
+Current features:
+
+- reusable features section component
+- four service highlight cards using mapped data structure
+- icon-based feature presentation using lucide-react
+- responsive grid layout for mobile and desktop
+- delivery, organic, speed and payment indicators
+- centralized content-driven rendering approach
+
+Current techniques used:
+
+- array mapping for UI generation
+- reusable component composition
+- responsive grid layout
+- utility-first styling
+- icon-driven UI structure
+
+Current approach:
+
+- keep homepage sections modular
+- avoid repeated static UI blocks
+- centralize section content into structured data
+- maintain scalable landing page composition
