@@ -1,3 +1,6 @@
+import Banner from "@/components/home/Banner";
+import Navbar from "@/components/navigation/Navbar";
+
 export default function CustomerLayout({
   children,
 }: {
@@ -5,8 +8,8 @@ export default function CustomerLayout({
 }) {
   return (
     <>
-      <p>banner</p>
-      <p>navbar</p>
+      <Banner />
+      <Navbar />
 
       <main>
         {children}
