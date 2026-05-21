@@ -1,4 +1,5 @@
 import Banner from "@/components/home/Banner";
+import Footer from "@/components/navigation/Footer";
 import Navbar from "@/components/navigation/Navbar";
 
 export default function CustomerLayout({
@@ -15,7 +16,7 @@ export default function CustomerLayout({
         {children}
       </main>
 
-      <p>footer</p>
+      <Footer />
       <p>cart sidebar</p>
     </>
   );

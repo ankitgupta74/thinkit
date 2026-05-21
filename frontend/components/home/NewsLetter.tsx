@@ -1,3 +1,5 @@
+"use client";
+
 import { MailIcon } from "lucide-react"
 
 function NewsLetter() {
