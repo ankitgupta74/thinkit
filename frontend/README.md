@@ -449,3 +449,38 @@ Current approach:
 - keep product display logic reusable
 - centralize app configuration through environment variables
 - separate UI rendering from future cart/business logic
+
+---
+
+## Promo banner progress
+
+Implemented promotional CTA section for homepage engagement.
+
+Current updates:
+
+- added reusable `PromoBanner` component
+- integrated promotional section into homepage flow
+- added app download call-to-action buttons
+- integrated delivery illustration using `next/image`
+- implemented responsive content and image layout
+
+Component location:
+
+```bash
+components/
+└── home/
+    └── PromoBanner.tsx
+```
+
+Current techniques used:
+
+- reusable component composition
+- responsive flex layouts
+- optimized image rendering with `next/image`
+- call-to-action driven UI structure
+
+Current approach:
+
+- keep promotional sections isolated and reusable
+- maintain homepage section-based architecture
+- improve content flow using modular homepage components
