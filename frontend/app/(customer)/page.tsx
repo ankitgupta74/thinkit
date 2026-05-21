@@ -1,6 +1,7 @@
 import Categories from "@/components/home/Categories";
 import Features from "@/components/home/Features";
 import Hero from "@/components/home/Hero";
+import NewsLetter from "@/components/home/NewsLetter";
 import PopularProducts from "@/components/home/PopularProducts";
 import PromoBanner from "@/components/home/PromoBanner";
 
@@ -12,6 +13,7 @@ function Home() {
       <Categories />
       <PopularProducts />
       <PromoBanner />
+      <NewsLetter />
     </div>
   )
 }

@@ -484,3 +484,40 @@ Current approach:
 - keep promotional sections isolated and reusable
 - maintain homepage section-based architecture
 - improve content flow using modular homepage components
+
+---
+
+## Newsletter section progress
+
+Implemented reusable newsletter subscription section for homepage engagement.
+
+Current updates:
+
+- added reusable `NewsLetter` component
+- integrated newsletter section into homepage flow
+- added email subscription form UI
+- added newsletter call-to-action section
+- integrated `MailIcon` using lucide-react
+- added form structure with basic submit handling
+
+Component location:
+
+```bash
+components/
+└── home/
+    └── NewsLetter.tsx
+```
+
+Current techniques used:
+
+- reusable component composition
+- controlled form structure
+- responsive layout design
+- icon-based UI enhancement
+- event handling with form submission prevention
+
+Current approach:
+
+- keep homepage sections modular
+- isolate subscription UI into reusable components
+- maintain section-based homepage architecture
