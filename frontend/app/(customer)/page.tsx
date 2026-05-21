@@ -1,6 +1,7 @@
 import Categories from "@/components/home/Categories";
 import Features from "@/components/home/Features";
 import Hero from "@/components/home/Hero";
+import PopularProducts from "@/components/home/PopularProducts";
 
 function Home() {
   return (
@@ -8,6 +9,7 @@ function Home() {
       <Hero />
       <Features />
       <Categories />
+      <PopularProducts />
     </div>
   )
 }

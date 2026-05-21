@@ -417,3 +417,35 @@ Current approach:
 - centralize category data into structured objects
 - avoid repeated static category markup
 - support scalable content-driven rendering
+
+---
+
+## Product showcase progress
+
+Implemented reusable product listing foundation and homepage integration.
+
+Current updates:
+
+- added reusable `ProductCard` component
+- integrated popular products section on homepage
+- added dynamic product detail navigation using product ids
+- added add-to-cart interaction placeholder
+- implemented pricing, discount and rating UI
+- added optimized image rendering using `next/image`
+- configured remote image support in `next.config.ts`
+- added environment-based currency configuration
+
+Current techniques used:
+
+- reusable component composition
+- dynamic route navigation with `useRouter`
+- event propagation control using `stopPropagation`
+- conditional rendering
+- environment variables with `.env.local`
+- Next.js image optimization
+
+Current approach:
+
+- keep product display logic reusable
+- centralize app configuration through environment variables
+- separate UI rendering from future cart/business logic
