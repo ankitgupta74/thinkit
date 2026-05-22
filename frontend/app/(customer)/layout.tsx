@@ -1,3 +1,4 @@
+import CartSidebar from "@/components/cart/CartSidebar";
 import Banner from "@/components/home/Banner";
 import Footer from "@/components/navigation/Footer";
 import Navbar from "@/components/navigation/Navbar";
@@ -17,7 +18,7 @@ export default function CustomerLayout({
       </main>
 
       <Footer />
-      <p>cart sidebar</p>
+      <CartSidebar />
     </>
   );
 }

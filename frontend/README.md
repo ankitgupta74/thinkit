@@ -567,3 +567,59 @@ Current approach:
 - keep shared page sections inside layouts
 - centralize navigation-related components
 - reduce repeated page structure logic
+
+---
+
+## Cart system progress
+
+Implemented shared cart state and integrated functional cart flow across customer pages.
+
+Current updates:
+
+- added `CartProvider` to root layout
+- integrated `CartSidebar` into customer layout
+- connected `ProductCard` add-to-cart actions
+- connected navbar cart count and sidebar toggle
+- added quantity update controls
+- added remove product functionality
+- added subtotal, delivery fee and total calculations
+- added checkout navigation from cart sidebar
+
+Component locations:
+
+```bash
+components/
+├── cart/
+│   └── CartSidebar.tsx
+│
+├── product/
+│   └── ProductCard.tsx
+│
+└── navigation/
+    └── Navbar.tsx
+```
+
+Context integration:
+
+```bash
+context/
+└── cart/
+```
+
+Current techniques used:
+
+- React Context API
+- custom hooks using `useCart`
+- shared state management
+- provider wrapping through root layout
+- event propagation control
+- conditional rendering
+- derived cart calculations
+- client-side navigation
+
+Current approach:
+
+- centralize cart logic through context
+- avoid prop drilling across components
+- keep UI and cart state separated
+- share cart functionality across layouts and pages

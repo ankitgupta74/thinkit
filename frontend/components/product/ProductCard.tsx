@@ -1,5 +1,6 @@
 "use client";
 
+import { useCart } from "@/context/cart/useCart";
 import { Product } from "@/types"
 import { CURRENCY } from "@/utils/config";
 import {
@@ -16,9 +17,7 @@ interface Props {
 function ProductCard({ product }: Props) {
   const router = useRouter();
 
-  const { addToCart } = {
-    addToCart: (_data: Product) => {}
-  }
+  const { addToCart } = useCart();
 
   return (
     <div

@@ -1,5 +1,6 @@
 "use client";
 
+import { useCart } from "@/context/cart/useCart";
 import {
   ArrowUpRightIcon,
   ChevronDownIcon,
@@ -33,10 +34,7 @@ function Navbar() {
     isAdmin: true,
   };
 
-  const { cartCount, setIsCartOpen } = {
-    cartCount: 5,
-    setIsCartOpen: (_: boolean) => {},
-  };
+  const { cartCount, setIsCartOpen } = useCart();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
