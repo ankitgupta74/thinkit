@@ -674,3 +674,60 @@ Current approach:
 - avoid prop drilling across components
 - keep UI and cart state separated
 - share cart functionality across layouts and pages
+
+---
+
+## Product listing and filter system progress
+
+Implemented URL-based product filtering and reusable product transformation flow.
+
+Current updates:
+
+- added products page with filtering, sorting and pagination
+- added reusable `FilterPanel` component
+- added category filtering
+- added organic product filtering
+- added price range filtering
+- added sorting controls
+- added pagination handling
+- added mobile filter drawer
+- added filter reset functionality
+- added active filter detection
+- added product result count display
+- added empty state and loading state handling
+
+Hook and utility structure:
+
+```bash
+hooks/
+├── useBodyScrollLock.ts
+└── useProduct.ts
+
+utils/
+└── productHelpers.ts
+
+components/
+└── product/
+    └── FilterPanel.tsx
+```
+
+Current techniques used:
+
+- URL state using `useSearchParams`
+- route updates using `router.replace`
+- custom hooks
+- reusable helper functions
+- `useMemo` for derived state
+- modal body scroll locking
+- local and URL state separation
+- filtering → sorting → pagination pipeline
+- responsive drawer pattern
+- immutable data transformation
+
+Current approach:
+
+- keep URL as single source of truth
+- centralize query update logic
+- isolate business logic inside hooks
+- keep page components focused on coordination and rendering
+- separate UI state from transformation logic

@@ -12,9 +12,13 @@ import { useRouter } from "next/navigation";
 
 interface Props {
   product: Product;
+  priority?: boolean;
 }
 
-function ProductCard({ product }: Props) {
+function ProductCard({
+  product,
+  priority = false
+}: Props) {
   const router = useRouter();
 
   const { addToCart } = useCart();
@@ -29,7 +33,7 @@ function ProductCard({ product }: Props) {
           src={product.image}
           alt={product.name}
           fill
-          loading="lazy"
+          priority={priority}
           sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, 20vw"
           className="object-cover p-4 group-hover:p-2 transition-all duration-300"
         />
