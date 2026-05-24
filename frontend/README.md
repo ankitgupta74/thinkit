@@ -731,3 +731,74 @@ Current approach:
 - isolate business logic inside hooks
 - keep page components focused on coordination and rendering
 - separate UI state from transformation logic
+
+---
+
+## Pagination system progress
+
+Implemented reusable pagination UI and shared pagination logic across product sections.
+
+Current updates:
+
+- added reusable `Pagination` component
+- added generic `usePagination` custom hook
+- integrated pagination into products page
+- integrated pagination into flash deals page
+- added URL-based page state handling
+- added page update through query params
+- added scroll-to-top behavior during page changes
+- moved pagination logic out of page components
+
+Structure:
+
+```bash
+components/
+└── ui/
+    └── Pagination.tsx
+
+hooks/
+└── usePagination.ts
+```
+
+Current techniques used:
+
+- custom hooks
+- generic TypeScript hooks
+- URL state management
+- reusable UI components
+- query param updates
+- memoization using `useMemo`
+- pagination slicing pattern
+
+Current approach:
+
+- keep pagination logic reusable
+- separate UI from calculations
+- keep page state shareable through URLs
+- avoid repeating pagination logic across pages
+
+Flash Deals page integration:
+
+```bash
+app/
+└── (customer)/
+    └── flashDeals/
+        └── page.tsx
+```
+
+Flash Deals updates:
+
+- added dedicated flash deals page
+- added reusable product listing flow
+- added loading state handling
+- added empty state handling
+- reused shared pagination system
+- reused ProductCard rendering structure
+- integrated URL-based pagination state
+
+Current approach:
+
+- reuse existing product display patterns
+- keep page logic lightweight
+- reuse shared hooks and UI components
+- maintain same pagination behavior across pages

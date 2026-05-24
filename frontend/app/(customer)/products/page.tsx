@@ -3,13 +3,11 @@
 import FilterPanel from "@/components/product/FilterPanel";
 import ProductCard from "@/components/product/ProductCard";
 import Loader from "@/components/ui/Loader";
+import Pagination from "@/components/ui/Pagination";
 import useBodyScrollLock from "@/hooks/useBodyScrollLock";
 import useProducts from "@/hooks/useProduct";
 import { categoriesData } from "@/public/assets";
-import {
-  buildUpdatedParams,
-  FilterKey
-} from "@/utils/productHelpers";
+import { buildUpdatedParams, FilterKey } from "@/utils/productHelpers";
 import {
   ChevronDown,
   HomeIcon,
@@ -23,10 +21,7 @@ import {
   useRouter, // navigate/update URL
   usePathname, // get current route
 } from "next/navigation";
-import {
-  useMemo,
-  useState
-} from "react";
+import { useMemo, useState } from "react";
 
 // Page responsibility:
 // Read URL state → coordinate hooks → render UI.
@@ -46,9 +41,7 @@ function Products() {
   // Controls mobile filter sidebar
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   // Reusable modal pattern: lock page scroll while overlay is open
-  useBodyScrollLock(
-    mobileFilterOpen
-  );
+  useBodyScrollLock(mobileFilterOpen);
 
   // Read filters from URL
   // Single source of truth: UI state always comes from query params
@@ -68,20 +61,12 @@ function Products() {
   // Update a single filter in URL
   // Generic updater: same function works for category, sort, pagination, etc.
   const updateFilter = (key: FilterKey, value: string) => {
-    const params =
-      buildUpdatedParams(
-        searchParams,
-        key,
-        value
-      );
+    const params = buildUpdatedParams(searchParams, key, value);
 
     // Push updated URL
-    router.replace(
-      `${pathname}?${params.toString()}`,
-      {
-        scroll: false
-      }
-    );
+    router.replace(`${pathname}?${params.toString()}`, {
+      scroll: false,
+    });
 
     // auto-close drawer after selecting filters
     setMobileFilterOpen(false);
@@ -93,12 +78,9 @@ function Products() {
     const params = new URLSearchParams();
 
     // Navigate with no search params
-    router.replace(
-      `${pathname}?${params.toString()}`,
-      {
-        scroll: false
-      }
-    );
+    router.replace(`${pathname}?${params.toString()}`, {
+      scroll: false,
+    });
     setMobileFilterOpen(false);
   };
 
@@ -107,31 +89,21 @@ function Products() {
   const activeCategory =
     // Memoize lookup.
     // Recompute only when category changes.
-    useMemo(
-      () => categoriesData.find(
-        c => c.slug === category
-      ),
-      [category]
-    );
+    useMemo(() => categoriesData.find((c) => c.slug === category), [category]);
 
   // Check if any filter exists
   // Used for conditional UI: show reset actions only when needed
   const hasFilters = !!(category || organic || minPrice || maxPrice);
 
   // Product transformation pipeline lives in custom hook: filtering → sorting → pagination
-  const {
-    products,
-    totalProducts,
-    totalPages,
-    loading
-  }=useProducts({
+  const { products, totalProducts, totalPages, loading } = useProducts({
     category,
     organic,
     sort,
     page,
     minPrice,
     maxPrice,
-    itemsPerPage:12
+    itemsPerPage: 12,
   });
 
   return (
@@ -149,7 +121,7 @@ function Products() {
         </nav>
         <div className="flex gap-8 xl:gap-10">
           {/* Sidebar - Desktop */}
-          <aside className="hidden lg:block w-64 shrink-0">
+          <aside className="hidden lg:block w-70 shrink-0">
             <div className="bg-white rounded-2xl p-4 sticky top-24">
               <FilterPanel
                 categories={categoriesData}
@@ -249,23 +221,15 @@ function Products() {
               </div>
             )}
             {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex-center gap-2 mt-16">
-                {Array.from({ length: totalPages }).map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => {
-                      updateFilter("page", String(i + 1));
-                      window.scrollTo(0, 0);
-                    }}
-                    className={`size-9 rounded-lg text-sm font-medium transition-colors ${page === i + 1 ? "bg-app-green text-white" : "bg-white text-app-text-light hover:bg-app-cream"}`}
-                    type="button"
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-              </div>
-            )}
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={(page) => {
+                updateFilter("page", String(page));
+
+                window.scrollTo(0, 0);
+              }}
+            />
           </main>
         </div>
       </div>
