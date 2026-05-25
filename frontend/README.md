@@ -802,3 +802,55 @@ Current approach:
 - keep page logic lightweight
 - reuse shared hooks and UI components
 - maintain same pagination behavior across pages
+
+---
+
+## Product details page progress
+
+Implemented dynamic product details flow and reusable review system.
+
+Current updates:
+
+- added dynamic product details page using `[id]`
+- added product lookup using route params
+- added breadcrumb navigation
+- added browser back navigation
+- added product quantity controls
+- connected add-to-cart and quantity update flow
+- added stock availability states
+- added related products section
+- reused `ProductCard` rendering flow
+- added reusable `DummyReviewsSection`
+
+Structure:
+
+```bash
+app/
+└── (customer)/
+    └── products/
+        └── [id]/
+            └── page.tsx
+
+components/
+└── ui/
+    └── DummyReviewsSection.tsx
+```
+
+Current techniques used:
+
+- dynamic routing using `useParams`
+- route-based data lookup
+- conditional rendering
+- reusable component composition
+- derived UI state
+- memoization using `useMemo`
+- seeded random generation
+- shared cart integration
+- reusable product flow
+
+Current approach:
+
+- keep product page state derived from route data
+- reuse existing cart and product systems
+- keep review generation isolated
+- maintain reusable page sections
