@@ -854,3 +854,52 @@ Current approach:
 - reuse existing cart and product systems
 - keep review generation isolated
 - maintain reusable page sections
+
+---
+
+## Shop layout and orders progress
+
+Implemented shared shop layout structure and orders page flow.
+
+Current updates:
+
+- created shared `(shop)` layout wrapper
+- moved `(customer)` and `(protected)` inside `(shop)`
+- removed duplicated customer layout
+- centralized shared page wrappers
+- added orders page UI and order listing flow
+- added loading and empty states
+- added tab-based order sections
+- added order summary cards
+- added order status display
+- connected cart clearing through query params
+- updated delivery partner types
+
+Structure:
+
+```bash
+app/
+└── (shop)/
+    ├── layout.tsx
+    │
+    ├── (customer)/
+    └── (protected)/
+        └── orders/
+```
+
+Current techniques used:
+
+- nested route groups
+- shared layout composition
+- query parameter handling
+- conditional rendering
+- reusable state patterns
+- centralized UI wrappers
+- derived order states
+
+Current approach:
+
+- avoid duplicate layouts
+- keep shared UI at a higher route level
+- reuse layout wrappers across route groups
+- isolate order flow inside page-level logic

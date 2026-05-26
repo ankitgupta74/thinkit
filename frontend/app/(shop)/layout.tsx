@@ -3,7 +3,7 @@ import Banner from "@/components/home/Banner";
 import Footer from "@/components/navigation/Footer";
 import Navbar from "@/components/navigation/Navbar";
 
-export default function CustomerLayout({
+export default function ShopLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -11,6 +11,7 @@ export default function CustomerLayout({
   return (
     <>
       <Banner />
+
       <Navbar />
 
       <main>
@@ -18,6 +19,7 @@ export default function CustomerLayout({
       </main>
 
       <Footer />
+
       <CartSidebar />
     </>
   );

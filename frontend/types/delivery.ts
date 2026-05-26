@@ -7,11 +7,11 @@ export interface DeliveryPartner {
   email: string;
   phone: string;
 
-  avatar: string;
+  avatar?: string;
 
-  vehicleType: VehicleType;
+  vehicleType?: VehicleType;
 
-  isActive: boolean;
+  isActive?: boolean;
 
-  createdAt: string;
+  createdAt?: string;
 }

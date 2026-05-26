@@ -1,0 +1,167 @@
+"use client";
+
+import Loader from "@/components/ui/Loader";
+import { useCart } from "@/context/cart/useCart";
+import { dummyDashboardOrdersData, statusColors } from "@/public/assets";
+import { Order } from "@/types";
+import { CURRENCY } from "@/utils/config";
+import {
+  CalendarIcon,
+  ChevronRightIcon,
+  PackageIcon
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  usePathname,
+  useRouter,
+  useSearchParams
+} from "next/navigation";
+import { useEffect, useState } from "react";
+
+function Orders() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("all");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const tabs = ["all", "Placed", "Out for Delivery", "Delivered"];
+  const { clearCart } = useCart();
+
+  useEffect(() => {
+    const loadOrders = async () => {
+      setLoading(true);
+
+      const shouldClearCart = searchParams.get("clearCart");
+
+      if (shouldClearCart) {
+        clearCart();
+
+        router.replace(pathname, {
+          scroll: false,
+        });
+
+        // wait before loading
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+
+      setOrders(dummyDashboardOrdersData as Order[]);
+
+      setLoading(false);
+    };
+
+    loadOrders();
+  }, [searchParams, clearCart, router, pathname]);
+
+  return (
+    <div className="min-h-screen bg-app-cream mb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-2xl font-semibold text-app-green mb-6">Orders</h1>
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+          {tabs.map((tab) => (
+            <button
+              type="button"
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap transition-colors ${activeTab === tab ? "bg-app-green text-white" : "bg-white text-app-text-light hover:bg-app-cream"}`}
+            >
+              {tab === "all" ? "All Orders" : tab}
+            </button>
+          ))}
+        </div>
+        {/* Orders List */}
+        {loading ? (
+          <Loader />
+        ) : orders.length === 0 ? (
+          <div className="text-center py-16">
+            <PackageIcon className="size-16 text-app-border mx-auto mb-4" />
+            <h2 className="text-lg font-medium text-app-green mb-2">
+              No orders yet
+            </h2>
+            <p className="text-sm text-app-text-light mb-4">
+              Start shopping to see your orders here
+            </p>
+            <Link
+              href="/products"
+              className="inline-flex px-4 py-2 bg-app-green text-white text-sm rounded-lg"
+            >
+              Start Shopping
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {orders.map((order) => (
+              <Link
+                href={`/orders/${order._id}`}
+                key={order._id}
+                className="block max-w-4xl bg-white rounded-2xl p-5 hover:shadow transition-all"
+              >
+                {/* Order Id, Date, Status */}
+                <div className="flex items-start justify-between mb-3">
+                  {/* Left */}
+                  <div className="">
+                    <p className="text-sm font-medium text-app-green">
+                      Order #{order._id.slice(-8).toUpperCase()}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <CalendarIcon className="size-3 text-app-text-light" />
+                      <span className="text-xs text-app-text-light">
+                        {new Date(order.createdAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                  {/* Right */}
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`px-4 py-1 text-xs font-medium rounded-full ${statusColors[order.status] || "bg-gray-100 text-gray-700"}`}
+                    >
+                      {order.status}
+                    </span>
+                    <ChevronRightIcon className="size-4 text-app-text-light" />
+                  </div>
+                </div>
+                {/* Item thumbnails */}
+                <div className="flex items-center gap-2 mb-3">
+                  {order.items.slice(0, 4).map((item, i) => (
+                    <Image
+                      key={i}
+                      src={item.image}
+                      alt={item.name}
+                      width={100}
+                      height={100}
+                      className="size-12 sm:size-16 rounded-lg object-cover border border-app-border"
+                    />
+                  ))}
+                  {order.items.length > 4 && (
+                    <div className="size-12 sm:size-16">
+                      +{order.items.length - 4}
+                    </div>
+                  )}
+                </div>
+                {/* Total items and price */}
+                <div className="flex justify-between items-center pt-3 text-sm">
+                  <span className="text-app-text-light">
+                    {order.items.length} items
+                  </span>
+                  <span className="font-semibold text-app-green">
+                    {CURRENCY}
+                    {order.total.toFixed(2)}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default Orders;
