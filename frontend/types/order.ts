@@ -26,6 +26,12 @@ export interface StatusHistory {
   note: string;
 }
 
+export interface LiveLocation {
+  lat: number;
+  lng: number;
+  updatedAt: string;
+}
+
 export interface Order {
   _id: string;
 
@@ -34,6 +40,8 @@ export interface Order {
   items: OrderItem[];
 
   shippingAddress: Omit<Address, "_id" | "isDefault">;
+
+  liveLocation?: LiveLocation;
 
   paymentMethod: string;
 
@@ -56,4 +64,8 @@ export interface Order {
   isPaid: boolean;
 
   createdAt: string;
+
+  updatedAt?: string;
+
+  __v?: number;
 }

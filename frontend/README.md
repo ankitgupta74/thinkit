@@ -903,3 +903,65 @@ Current approach:
 - keep shared UI at a higher route level
 - reuse layout wrappers across route groups
 - isolate order flow inside page-level logic
+
+---
+
+## Order details and tracking progress
+
+Implemented order details flow with live order tracking and delivery progress UI.
+
+Current updates:
+
+- created dynamic order details page using `[id]`
+- added reusable `OrderOTP` component
+- added reusable `OrderTimeLine` component
+- added reusable `LiveMap` component
+- added delivery partner information section
+- added item summary and pricing breakdown
+- added delivery address section
+- added dynamic order status handling
+- updated order types with tracking-related models
+- added mounted state handling in navbar
+
+Structure:
+
+```bash
+app/
+└── (shop)/
+    └── (protected)/
+        └── orders/
+            └── [id]/
+
+components/
+└── order/
+    ├── LiveMap.tsx
+    ├── OrderOTP.tsx
+    └── OrderTimeLine.tsx
+```
+
+Current techniques used:
+
+- dynamic routes
+- dynamic imports with SSR disabled
+- reusable component composition
+- conditional rendering
+- status-driven UI flow
+- client-side map rendering
+- timeline progression pattern
+- hydration-safe rendering
+
+Current approach:
+
+- keep order tracking features modular
+- separate tracking, OTP and timeline concerns
+- avoid SSR issues for browser-only libraries
+- drive UI from order status and order history
+- extend domain models as features evolve
+
+Current tracking flow:
+
+- order page loads by route id
+- status controls OTP visibility
+- status history drives timeline progress
+- live location updates map position
+- delivery partner data controls tracking actions
