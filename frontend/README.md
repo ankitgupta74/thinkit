@@ -965,3 +965,64 @@ Current tracking flow:
 - status history drives timeline progress
 - live location updates map position
 - delivery partner data controls tracking actions
+
+---
+
+## Address management progress
+
+Implemented address management flow with reusable address UI and local CRUD interactions.
+
+Current updates:
+
+- created reusable `AddressCard` component
+- created reusable `AddressForm` modal component
+- implemented addresses management page
+- added add address functionality
+- added edit address functionality
+- added delete address functionality
+- added default address handling
+- added local controlled form state
+- added modal-based form interaction
+- added loading state handling
+- added empty state UI for addresses
+
+Structure:
+
+```bash
+app/
+└── (shop)/
+    └── (protected)/
+        └── addresses/
+
+components/
+└── address/
+    ├── AddressCard.tsx
+    └── AddressForm.tsx
+```
+
+Current techniques used:
+
+- reusable component composition
+- controlled forms
+- local state management
+- modal interaction pattern
+- conditional rendering
+- callback-driven actions
+- immutable state updates
+- TypeScript prop typing
+
+Current approach:
+
+- keep address UI modular and reusable
+- separate form logic from card rendering
+- centralize address state inside page component
+- reuse same form for create and edit flows
+- keep UI interaction responsive and isolated
+
+Current address flow:
+
+- user opens modal from add button
+- same form handles create and edit modes
+- edit mode pre-fills existing address data
+- local state updates immediately after actions
+- empty state appears when no addresses exist
