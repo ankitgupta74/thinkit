@@ -1026,3 +1026,67 @@ Current address flow:
 - edit mode pre-fills existing address data
 - local state updates immediately after actions
 - empty state appears when no addresses exist
+
+---
+
+## Checkout flow progress
+
+Implemented multi-step checkout flow with reusable checkout sections and order review system.
+
+Current updates:
+
+- created checkout page flow
+- added reusable `CheckoutAddress` component
+- added reusable `CheckoutPayment` component
+- added reusable `CheckoutReview` component
+- added address selection flow
+- added payment method selection
+- added order review section
+- added dynamic order summary calculations
+- integrated cart context into checkout
+- added empty cart fallback UI
+- added loading state during order placement
+- added step-based checkout navigation
+
+Structure:
+
+```bash
+app/
+└── (shop)/
+    └── (protected)/
+        └── checkout/
+
+components/
+└── checkout/
+    ├── CheckoutAddress.tsx
+    ├── CheckoutPayment.tsx
+    └── CheckoutReview.tsx
+```
+
+Current techniques used:
+
+- multi-step form flow
+- reusable component composition
+- controlled state management
+- conditional rendering
+- cart context integration
+- dynamic pricing calculation
+- sticky sidebar layout
+- local loading states
+- step-driven UI rendering
+
+Current approach:
+
+- split checkout into isolated reusable sections
+- keep checkout state centralized in page component
+- separate address, payment and review concerns
+- derive pricing values dynamically from cart state
+- keep checkout progression simple and guided
+
+Current checkout flow:
+
+- user selects delivery address
+- user selects payment method
+- user reviews items and totals
+- order summary updates dynamically
+- final action triggers order placement flow
