@@ -1148,3 +1148,89 @@ Current search flow:
 - products are filtered by name match
 - matching products are displayed in a responsive grid
 - empty state appears when no products match the search term
+
+---
+
+## Delivery order management progress
+
+Implemented delivery partner order management workflow with status actions, OTP verification and cancellation handling.
+
+Current updates:
+
+- added reusable `DeliveryOrderCard` component
+- added reusable `OTPModal` component
+- added reusable `CancelModal` component
+- added active delivery action controls
+- added completed delivery summary view
+- added delivery status progression workflow
+- added OTP-based delivery completion flow
+- added cancellation reason collection flow
+- added dynamic status badge rendering
+- added customer information display
+- added delivery address display
+- added payment method display
+- added delivery amount summary display
+- added delivery date display for completed orders
+
+Structure:
+
+```bash
+components/
+└── delivery/
+    ├── DeliveryOrderCard.tsx
+    ├── OTPModal.tsx
+    └── CancelModal.tsx
+```
+
+Current techniques used:
+
+- reusable modal components
+- controlled form inputs
+- conditional rendering
+- status-driven UI
+- parent-child state communication
+- callback-based action handling
+- delivery workflow state transitions
+- reusable card composition
+
+Current approach:
+
+- keep business logic in parent pages
+- keep delivery cards focused on presentation
+- keep modals reusable and isolated
+- drive actions from order status
+- prevent duplicate submissions using loading states
+- require OTP verification before marking deliveries complete
+- collect cancellation reasons before cancelling deliveries
+
+Current delivery workflow:
+
+```text
+Assigned
+   ↓
+Packed
+   ↓
+Out for Delivery
+   ↓
+OTP Verification
+   ↓
+Delivered
+```
+
+Cancellation flow:
+
+```text
+Open Cancel Modal
+   ↓
+Enter Reason
+   ↓
+Confirm Cancellation
+```
+
+Current UI behavior:
+
+- action buttons change automatically based on order status
+- OTP verification is available only for deliveries in progress
+- cancellation is hidden for completed orders
+- completed deliveries display delivery date instead of actions
+- customer and delivery information remain visible throughout the workflow

@@ -10,7 +10,7 @@ function Hero() {
     <section className='relative overflow-hidden min-h-135 mb-10 rounded-3xl flex items-center'>
       <Image
         src='/assets/hero_bg.jpeg'
-        alt='Hero Section'
+        alt='Hero Image'
         fill
         priority
         loading='eager'
