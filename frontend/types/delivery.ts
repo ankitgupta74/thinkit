@@ -11,7 +11,10 @@ export interface DeliveryPartner {
 
   vehicleType?: VehicleType;
 
-  isActive?: boolean;
+  isActive: boolean;
 
   createdAt?: string;
+  updatedAt?: string;
+
+  __v?: number;
 }

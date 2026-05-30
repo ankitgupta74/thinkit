@@ -2,6 +2,8 @@ import { Address } from "./address";
 import { DeliveryPartner } from "./delivery";
 
 export interface OrderItem {
+  _id: string;
+
   product: string;
 
   name: string;
@@ -21,6 +23,8 @@ export interface OrderUser {
 }
 
 export interface StatusHistory {
+  _id: string;
+
   status: string;
   timestamp: string;
   note: string;

@@ -1,3 +1,5 @@
+import type { Order } from "@/types";
+import type { DeliveryPartner } from "@/types";
 
 export const deliveryPartnerLoginImage =
   "https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=200";
@@ -723,7 +725,7 @@ export const dummyAdminDashboardData = {
   ],
 };
 
-export const dummyDeliveryPartnerData = [
+export const dummyDeliveryPartnerData: DeliveryPartner[] = [
   {
     _id: "69bbfc6c66db7c6cdea47ee4",
     name: "John Doe",
@@ -750,7 +752,7 @@ export const dummyDeliveryPartnerData = [
   },
 ];
 
-export const dummyDashboardOrdersData = [
+export const dummyDashboardOrdersData: Order[] = [
   {
     shippingAddress: {
       label: "Home",
@@ -835,6 +837,7 @@ export const dummyDashboardOrdersData = [
     deliveryPartner: {
       _id: "69bbfc3866db7c6cdea47ede",
       name: "Rahul",
+      isActive: false,
       email: "rahul@example.com",
       phone: "987654321",
       vehicleType: "bike" as const,
@@ -925,6 +928,7 @@ export const dummyDashboardOrdersData = [
       name: "Rahul",
       email: "rahul@example.com",
       phone: "987654321",
+      isActive: false,
       vehicleType: "bike" as const,
     },
     deliveryOtp: "754730",
