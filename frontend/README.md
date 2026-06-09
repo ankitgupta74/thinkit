@@ -2168,5 +2168,105 @@ app/api/orders/
 - Snapshot-Based Order Storage
 - Protected Resource Access
 
+## Background Jobs & Upload API Progress
+
+Implemented Inngest workflow integration and secure image upload functionality using Next.js Route Handlers, Cloudinary and background event processing.
+
+### Steps Taken
+
+1. Configured Inngest client.
+2. Created centralized Inngest API endpoint.
+3. Registered all background workflows.
+4. Connected auto rider assignment workflow.
+5. Connected low stock monitoring workflow.
+6. Connected monthly promotional email workflow.
+7. Created secure image upload API.
+8. Added admin-only upload access.
+9. Added image validation rules.
+10. Added file size validation.
+11. Added Cloudinary image storage integration.
+12. Added upload response handling.
+
+### Progress
+
+- Inngest event processing configured.
+- Background workflow registration completed.
+- Scheduled and event-driven jobs connected.
+- Product image upload API completed.
+- Cloudinary integration completed.
+- Upload validation completed.
+- Admin-protected upload endpoint completed.
+
+### API Workflows
+
+#### Inngest API
+
+```text
+Event / Cron Trigger
+→ Inngest Endpoint
+→ Match Workflow
+→ Execute Function
+→ Return Result
 ```
+
+#### Upload API
+
+```text
+Admin Request
+→ Verify Admin Access
+→ Validate Uploaded File
+→ Validate File Type
+→ Validate File Size
+→ Convert File To Buffer
+→ Upload To Cloudinary
+→ Return Image URL
 ```
+
+### Concepts Covered
+
+- Background Jobs
+- Event-Driven Architecture
+- Scheduled Workflows
+- Workflow Registration
+- Secure File Uploads
+- Cloud Image Storage
+- Role-Based Authorization
+- Server-Side Validation
+
+### Approach
+
+- Centralized all workflows through a single Inngest endpoint.
+- Registered background jobs in one location.
+- Restricted uploads to admin users.
+- Validated files before cloud upload.
+- Stored images externally using Cloudinary.
+
+### Techniques Used
+
+- Next.js Route Handlers
+- Inngest Integration
+- Cron Jobs
+- Event-Based Processing
+- Cloudinary Upload API
+- FormData Processing
+- Buffer Conversion
+- File Validation
+- Role-Based Access Control
+- Secure Media Storage
+
+### Files Added / Integrated
+
+```text
+app/api/inngest/route.ts
+app/api/upload/route.ts
+```
+
+### Backend Patterns Implemented
+
+- Background Job Processing
+- Event Registration Hub
+- Scheduled Task Execution
+- Secure Upload Pipeline
+- Admin Protected APIs
+- External Media Storage
+- Request Validation Layer
