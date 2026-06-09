@@ -1661,3 +1661,127 @@ inngest/
 - nodemailer
 - mongodb
 - Next.js App Router backend utilities
+
+## Authentication API Progress
+
+Implemented complete authentication backend using Next.js Route Handlers, MongoDB, Mongoose, JWT, secure cookies and password hashing.
+
+### Steps Taken
+
+1. Created authentication API routes using Next.js App Router.
+2. Connected APIs with MongoDB through Mongoose.
+3. Added user registration endpoint.
+4. Added user login endpoint.
+5. Implemented request body validation.
+6. Added email format validation.
+7. Added password strength validation.
+8. Implemented duplicate account prevention.
+9. Added password hashing using bcrypt.
+10. Implemented JWT token generation.
+11. Added secure cookie-based authentication.
+12. Integrated admin role detection.
+13. Added centralized server error handling.
+14. Sanitized user data before API responses.
+
+### Progress
+
+- Authentication API structure completed.
+- User registration API completed.
+- User login API completed.
+- Password encryption completed.
+- JWT authentication completed.
+- Secure cookie session handling completed.
+- Admin access detection completed.
+- Validation and error handling completed.
+- Database integration completed.
+
+### API Workflow
+
+#### Register API
+
+```text
+Client Request
+→ Validate Input Fields
+→ Validate Email Format
+→ Validate Password Rules
+→ Connect Database
+→ Check Existing User
+→ Hash Password
+→ Create User
+→ Generate JWT Token
+→ Set Secure Cookie
+→ Return User Data
+```
+
+#### Login API
+
+```text
+Client Request
+→ Validate Input Fields
+→ Validate Email Format
+→ Connect Database
+→ Find User
+→ Verify Password
+→ Generate JWT Token
+→ Set Secure Cookie
+→ Return User Data
+```
+
+### Concepts Covered
+
+- Authentication
+- Authorization
+- JWT Tokens
+- Secure Cookies
+- Password Hashing
+- User Registration
+- User Login
+- Input Validation
+- Role-Based Access
+- API Security
+- Session Management
+- Error Handling
+
+### Approach
+
+- Keep authentication logic inside dedicated API routes.
+- Store passwords only as hashes.
+- Use JWT for identity verification.
+- Persist authentication using HTTP-only cookies.
+- Prevent duplicate accounts through email uniqueness checks.
+- Return sanitized user objects to the frontend.
+- Centralize unexpected error handling.
+
+### Techniques Used
+
+- Next.js Route Handlers
+- Mongoose Database Queries
+- bcrypt Password Hashing
+- bcrypt Password Verification
+- JWT Token Generation
+- HTTP-only Cookies
+- Secure Cookie Configuration
+- Email Normalization
+- Request Validation
+- Centralized API Error Handling
+
+### Files Added / Integrated
+
+```text
+app/api/auth/
+├── login/route.ts
+└── register/route.ts
+```
+
+### Packages & Backend Utilities Used
+
+- next/server
+- mongoose
+- mongodb
+- bcryptjs
+- jsonwebtoken
+- cookies API
+- JWT helper utilities
+- MongoDB connection helper
+- Admin access helper
+- Centralized API error helper
