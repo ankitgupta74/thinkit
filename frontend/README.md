@@ -1963,3 +1963,210 @@ app/api/products/
 - Admin Protected APIs
 - Dynamic Discount Calculation
 - MongoDB Query Building
+
+## Orders API Progress
+
+Implemented complete order management APIs covering order creation, customer order history, order details, order cancellation, admin order management, order status updates, and live order tracking using Next.js Route Handlers, MongoDB and Mongoose.
+
+### Steps Taken
+
+1. Created order management API structure.
+2. Added customer order history endpoint.
+3. Added order placement endpoint.
+4. Added stock validation before checkout.
+5. Added order snapshot creation.
+6. Added automatic order total calculations.
+7. Added inventory reduction after purchase.
+8. Added single order details endpoint.
+9. Added customer order cancellation endpoint.
+10. Added admin order listing endpoint.
+11. Added admin order deletion endpoint.
+12. Added admin order status update endpoint.
+13. Added status history tracking.
+14. Added live order tracking endpoint.
+15. Added user ownership verification.
+16. Added admin authorization checks.
+17. Added model population for related data.
+
+### Progress
+
+- Customer order history API completed.
+- Order placement API completed.
+- Product stock verification completed.
+- Order pricing calculation completed.
+- Inventory deduction completed.
+- Order details API completed.
+- Order cancellation API completed.
+- Admin order management API completed.
+- Order status management API completed.
+- Status timeline tracking completed.
+- Live delivery tracking API completed.
+- User and admin authorization completed.
+
+### API Workflows
+
+#### Order History API (GET /api/orders)
+
+```text
+Customer Request
+→ Verify Login
+→ Fetch User Orders
+→ Populate Delivery Partner
+→ Sort Latest First
+→ Return Orders
+```
+
+#### Place Order API (POST /api/orders)
+
+```text
+Customer Request
+→ Verify Login
+→ Validate Order Items
+→ Fetch Products
+→ Verify Stock Availability
+→ Create Order Snapshot
+→ Calculate Pricing
+→ Create Order
+→ Add Initial Status History
+→ Update Product Stock
+→ Populate Order Data
+→ Return Order
+```
+
+#### Order Details API (GET /api/orders/[id])
+
+```text
+Customer Request
+→ Verify Login
+→ Verify Order Ownership
+→ Fetch Order
+→ Populate User & Rider Data
+→ Return Order Details
+```
+
+#### Cancel Order API (PATCH /api/orders/[id])
+
+```text
+Customer Request
+→ Verify Login
+→ Verify Order Ownership
+→ Validate Order Status
+→ Append Status History
+→ Update Order Status
+→ Return Updated Order
+```
+
+#### Admin Orders API (GET /api/orders/all)
+
+```text
+Admin Request
+→ Verify Admin Access
+→ Fetch All Orders
+→ Populate User Details
+→ Populate Rider Details
+→ Sort Latest First
+→ Return Orders
+```
+
+#### Order Status API (PUT /api/orders/[id]/status)
+
+```text
+Admin Request
+→ Verify Admin Access
+→ Validate Status
+→ Fetch Order
+→ Append Status History
+→ Update Status
+→ Return Updated Order
+```
+
+#### Delete Order API (DELETE /api/orders/[id])
+
+```text
+Admin Request
+→ Verify Admin Access
+→ Find Order
+→ Delete Order
+→ Return Success Response
+```
+
+#### Live Tracking API (GET /api/orders/[id]/location)
+
+```text
+Customer Request
+→ Verify Login
+→ Verify Order Ownership
+→ Fetch Tracking Data
+→ Return Location & Status
+```
+
+### Concepts Covered
+
+- Order Management
+- Checkout Processing
+- Inventory Management
+- Order Lifecycle
+- Order Status Tracking
+- Status History
+- Order Ownership Validation
+- Admin Authorization
+- Live Order Tracking
+- Data Population
+- Stock Validation
+- Order Snapshot Pattern
+
+### Approach
+
+- Store product snapshots inside orders to preserve historical accuracy.
+- Verify stock directly from the database before order creation.
+- Protect customer routes through ownership validation.
+- Protect management routes through admin authorization.
+- Maintain complete order timelines using status history.
+- Keep pricing calculations server-side.
+- Populate related documents only when required.
+
+### Techniques Used
+
+- Next.js Route Handlers
+- MongoDB Queries
+- Mongoose Populate
+- Authentication Guards
+- Authorization Guards
+- Inventory Validation
+- Dynamic Price Calculation
+- Snapshot Data Storage
+- Status History Tracking
+- MongoDB Atomic Updates
+- Protected API Routes
+- Order Tracking Pattern
+
+### Files Added / Integrated
+
+```text
+app/api/orders/
+├── route.ts
+├── all/
+│   └── route.ts
+└── [id]/
+    ├── route.ts
+    ├── status/
+    │   └── route.ts
+    └── location/
+        └── route.ts
+```
+
+### Backend Patterns Implemented
+
+- Customer Order Management
+- Checkout Processing
+- Inventory Deduction
+- Order Timeline Tracking
+- Status Workflow Management
+- Admin Order Operations
+- Ownership-Based Access Control
+- Live Delivery Tracking
+- Snapshot-Based Order Storage
+- Protected Resource Access
+
+```
+```
