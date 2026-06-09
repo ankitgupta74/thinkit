@@ -1555,3 +1555,109 @@ lib/
 ├── nodemailer.ts
 └── orderStatus.ts
 ```
+
+## Background Jobs & Workflow Automation Progress
+
+Implemented event-driven background workflows using Inngest to automate operational tasks, inventory monitoring, delivery partner assignment and customer engagement emails.
+
+### Steps Taken
+
+1. Installed and configured Inngest.
+2. Created a centralized Inngest client for workflow registration.
+3. Connected workflows with MongoDB models and application services.
+4. Implemented event-driven inventory monitoring workflow.
+5. Implemented scheduled monthly marketing email workflow.
+6. Implemented automated delivery rider assignment workflow.
+7. Integrated workflow email notifications through Nodemailer.
+8. Connected workflows with product, user, order and delivery partner collections.
+9. Added workflow logging for execution tracking and debugging.
+
+### Progress
+
+- Inngest background job infrastructure completed.
+- Shared workflow client setup completed.
+- Low stock alert automation completed.
+- Monthly promotional email automation completed.
+- Automatic delivery rider assignment workflow completed.
+- Event-based workflow execution completed.
+- Cron-based workflow scheduling completed.
+- Workflow integration with MongoDB completed.
+- Automated email notification workflows completed.
+
+### Concepts Covered
+
+- Event-Driven Architecture
+- Background Jobs
+- Workflow Automation
+- Scheduled Tasks
+- Cron Jobs
+- Inventory Monitoring
+- Email Campaign Automation
+- Order Fulfillment Automation
+- Delivery Assignment Logic
+- Workflow Orchestration
+- Async Processing
+- Operational Automation
+
+### Approach
+
+- Separate long-running business operations from user requests.
+- Trigger workflows through events or schedules.
+- Reuse existing database, email and model utilities.
+- Encapsulate each business process inside an independent workflow.
+- Maintain execution visibility through workflow logs.
+
+### Techniques Used
+
+- Inngest event triggers
+- Inngest cron scheduling
+- Workflow step execution (`step.run`)
+- Delayed execution (`step.sleep`)
+- Batch processing for email campaigns
+- Database-driven workflow decisions
+- Automated OTP generation
+- Dynamic email generation
+- Event-based inventory tracking
+- Rider availability filtering and assignment
+
+## Workflows Implemented
+
+### Low Stock Alert
+
+- Triggered on inventory updates.
+- Checks product stock levels.
+- Sends automated email alerts to admins when stock falls below threshold.
+
+#### Monthly Offers Campaign
+
+- Runs automatically on a monthly schedule.
+- Fetches available promotional products.
+- Retrieves customer list.
+- Sends marketing emails in batches.
+
+#### Auto Assign Rider
+
+- Triggered after order placement.
+- Validates order state.
+- Finds available delivery partners.
+- Auto-generates delivery OTP.
+- Updates order status and assignment history.
+
+### Backend Structure Added
+
+```text
+inngest/
+├── client.ts
+└── functions/
+    ├── autoAssignRider.ts
+    ├── lowStockAlert.ts
+    └── sendMonthlyOffers.ts
+```
+
+### Packages & Integrations Used
+
+- inngest
+- mongoose
+- nodemailer
+- mongodb
+- Next.js App Router backend utilities

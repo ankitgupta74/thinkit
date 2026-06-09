@@ -127,6 +127,7 @@ function Product() {
                 alt={product.name}
                 width={400}
                 height={400}
+                loading="eager"
                 className="max-h-90 w-auto object-contain"
               />
               {/* Badge */}
