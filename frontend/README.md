@@ -1461,3 +1461,97 @@ Current approach:
 - use snapshots for order accuracy and historical data
 - align backend schemas with frontend types
 - centralize business data structure inside Mongoose models
+
+## Authentication, Infrastructure and Core Backend Utilities Progress
+
+Implemented the foundational backend infrastructure required for authentication, database access, file storage, email delivery, role management and application-wide utility handling.
+
+### Steps Taken
+
+1. Installed backend dependencies and TypeScript type packages.
+2. Configured environment-based application settings using `.env.local`.
+3. Connected Next.js application with MongoDB using Mongoose.
+4. Implemented reusable database connection utility.
+5. Configured JWT-based authentication system.
+6. Added authenticated user retrieval from cookies and tokens.
+7. Implemented admin access validation utilities.
+8. Configured Cloudinary for media storage and delivery.
+9. Configured Nodemailer SMTP service for email sending.
+10. Centralized order lifecycle statuses.
+11. Added reusable API error handling helper.
+12. Organized backend utilities inside the `lib` directory.
+
+### Progress
+
+- MongoDB integration completed.
+- Mongoose connection management completed.
+- JWT token generation and verification completed.
+- Cookie-based authentication flow completed.
+- Admin authorization helper completed.
+- Cloudinary configuration completed.
+- SMTP email service configuration completed.
+- Reusable email sender utility completed.
+- Centralized order status management completed.
+- Standardized API error response handling completed.
+- Environment variable configuration completed.
+
+### Concepts Covered
+
+- Environment Configuration
+- Authentication
+- Authorization
+- JWT Tokens
+- Cookie-Based Sessions
+- Database Connectivity
+- Cloud Storage Integration
+- Email Infrastructure
+- Role-Based Access Control
+- Centralized Error Handling
+- Configuration Management
+- Shared Backend Utilities
+
+### Approach
+
+- Keep infrastructure logic separated from business logic.
+- Centralize reusable backend functionality inside `lib`.
+- Use environment variables for all sensitive configuration.
+- Protect admin functionality through dedicated authorization checks.
+- Reuse utility functions across APIs to reduce duplication.
+- Maintain consistent API responses and authentication flow.
+
+### Techniques Used
+
+- Mongoose connection reuse pattern
+- JWT signing and verification
+- Next.js cookie handling
+- Environment-based role management
+- Cloudinary SDK configuration
+- Nodemailer transporter abstraction
+- Shared utility architecture
+- Centralized constants management
+- Standardized server error responses
+
+### Packages and Libraries Configured
+
+- mongoose
+- mongodb
+- jsonwebtoken
+- cloudinary
+- nodemailer
+- bcryptjs
+- inngest
+- TypeScript type packages for backend integrations
+
+### Backend Utility Structure
+
+```text
+lib/
+├── admin.ts
+├── apiError.ts
+├── auth.ts
+├── cloudinary.ts
+├── jwt.ts
+├── mongodb.ts
+├── nodemailer.ts
+└── orderStatus.ts
+```
