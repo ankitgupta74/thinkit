@@ -1,4 +1,4 @@
-# ThinkIt Frontend
+# ThinkIt
 
 Frontend application for ThinkIt grocery delivery platform.
 
@@ -1394,3 +1394,70 @@ Current admin modules:
 - order management
 - delivery partner management
 - onboarding workflows
+
+## Backend foundation and database modeling progress
+
+Implemented backend project foundation and core database models using MongoDB and Mongoose.
+
+Current updates:
+
+- configured MongoDB database integration
+- installed and configured Mongoose
+- added environment variable setup for database connection
+- established backend model architecture
+- created User model
+- created Product model
+- created Order model
+- created Address model
+- created DeliveryPartner model
+- added model relationships using ObjectId references
+- added schema validation rules
+- added default values and field constraints
+- added timestamps across all collections
+- added database indexes for frequently queried fields
+- added embedded schemas for order items, status history, live location and shipping address snapshots
+- implemented model reuse pattern using `models || model` to prevent Next.js hot reload issues
+- aligned database schemas with existing frontend TypeScript types
+
+Structure:
+
+```bash
+models/
+├── Address.ts
+├── DeliveryPartner.ts
+├── Order.ts
+├── Product.ts
+└── User.ts
+```
+
+Current concepts covered:
+
+- MongoDB document modeling
+- Mongoose schemas and models
+- collection relationships
+- embedded documents
+- referenced documents
+- schema validation
+- indexing
+- timestamps
+- data normalization
+- snapshot-based order storage
+
+Current techniques used:
+
+- ObjectId references with `ref`
+- nested sub-schemas
+- reusable schema composition
+- model caching pattern
+- field constraints and defaults
+- collection indexing
+- TypeScript-compatible schema design
+
+Current approach:
+
+- design database models before API development
+- keep collections separated by domain responsibility
+- use references for related entities
+- use snapshots for order accuracy and historical data
+- align backend schemas with frontend types
+- centralize business data structure inside Mongoose models
