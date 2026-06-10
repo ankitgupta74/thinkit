@@ -2270,3 +2270,143 @@ app/api/upload/route.ts
 - Admin Protected APIs
 - External Media Storage
 - Request Validation Layer
+
+## Database Seeding System Progress
+
+Implemented reusable database seeding infrastructure for populating MongoDB with development and testing data.
+
+### Steps Taken
+
+1. Installed seeding dependencies and runtime support.
+2. Added dedicated scripts directory for database population.
+3. Configured environment loading for standalone script execution.
+4. Created shared bootstrap setup for script initialization.
+5. Added npm commands for running seed operations.
+6. Created user seeding workflow.
+7. Created product seeding workflow.
+8. Created delivery partner seeding workflow.
+9. Created address seeding workflow.
+10. Added reusable product dataset for bulk insertion.
+11. Added password hashing before storing seeded accounts.
+12. Added database cleanup before inserting fresh records.
+13. Added relationship mapping between users and addresses.
+14. Added randomized delivery partner data generation.
+
+### Progress
+
+- Database seeding infrastructure completed.
+- Environment-aware script execution configured.
+- User seed data completed.
+- Product catalog seed data completed.
+- Delivery partner seed data completed.
+- Address seed data completed.
+- MongoDB bulk insertion workflow completed.
+- Development dataset generation completed.
+
+### Seed Workflow
+
+#### User Seed
+
+```text
+Run Script
+→ Load Environment Variables
+→ Connect Database
+→ Remove Existing Users
+→ Hash Passwords
+→ Create Users
+→ Insert Records
+```
+
+#### Product Seed
+
+```text
+Run Script
+→ Load Environment Variables
+→ Connect Database
+→ Remove Existing Products
+→ Load Product Dataset
+→ Bulk Insert Products
+```
+
+#### Delivery Partner Seed
+
+```text
+Run Script
+→ Load Environment Variables
+→ Connect Database
+→ Remove Existing Riders
+→ Hash Password
+→ Generate Rider Data
+→ Bulk Insert Riders
+```
+
+#### Address Seed
+
+```text
+Run Script
+→ Load Environment Variables
+→ Connect Database
+→ Remove Existing Addresses
+→ Fetch Users
+→ Map Addresses To Users
+→ Bulk Insert Addresses
+```
+
+### Concepts Covered
+
+- Database Seeding
+- Development Data Generation
+- Bulk Data Insertion
+- Environment Configuration
+- Data Relationships
+- Password Hashing
+- Script Automation
+- Dataset Management
+
+### Approach
+
+- Centralized script initialization using a shared bootstrap file.
+- Isolated seed logic into dedicated scripts.
+- Reset collections before inserting fresh records.
+- Generated relational data using existing database records.
+- Used reusable datasets for product population.
+
+### Techniques Used
+
+- MongoDB Seed Scripts
+- Mongoose Models
+- Bulk Insert Operations
+- Collection Cleanup
+- bcrypt Password Hashing
+- Environment Variable Loading
+- TSX Script Execution
+- Dynamic Data Generation
+- Relationship Mapping
+- Script-Based Database Management
+
+### Packages & Tooling Added
+
+- dotenv
+- tsx
+
+### NPM Scripts Added
+
+```text
+seed:users
+seed:products
+seed:riders
+seed:addresses
+```
+
+### Files Added
+
+```text
+scripts/bootstrap.ts
+scripts/seedUsers.ts
+scripts/seedProducts.ts
+scripts/seedDeliveryPartners.ts
+scripts/seedAddresses.ts
+scripts/data/products.ts
+```
+
+Product dataset prepared for bulk product population and catalog initialization.

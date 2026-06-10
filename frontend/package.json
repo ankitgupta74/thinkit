@@ -7,12 +7,17 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "inngest-dev": "npx inngest-cli@latest dev"
+    "inngest-dev": "npx inngest-cli@latest dev",
+    "seed:users": "tsx scripts/seedUsers.ts",
+    "seed:products": "tsx scripts/seedProducts.ts",
+    "seed:riders": "tsx scripts/seedDeliveryPartners.ts",
+    "seed:addresses": "tsx scripts/seedAddresses.ts"
   },
   "dependencies": {
     "@icons-pack/react-simple-icons": "^13.11.1",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.10.0",
+    "dotenv": "^17.4.2",
     "inngest": "^4.5.0",
     "jsonwebtoken": "^9.0.3",
     "leaflet": "^1.9.4",
@@ -39,6 +44,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
+    "tsx": "^4.22.4",
     "typescript": "^5"
   }
 }
