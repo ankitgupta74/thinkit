@@ -2410,3 +2410,125 @@ scripts/data/products.ts
 ```
 
 Product dataset prepared for bulk product population and catalog initialization.
+
+## Homepage Product Integration & Navigation Progress
+
+### Steps Taken
+
+- Connected homepage product section with backend products API.
+- Replaced static homepage product data with database-driven product loading.
+- Implemented client-side product fetching using API requests.
+- Added loading state handling during product retrieval.
+- Limited homepage showcase to featured product subset.
+- Integrated reusable ProductCard rendering with backend data.
+- Connected homepage sections into a unified customer landing page.
+- Enhanced navigation search workflow using URL query parameters.
+- Integrated authentication-aware navbar behavior.
+- Connected cart state with navigation badge updates.
+- Added role-based navigation rendering for admin users.
+- Implemented hydration-safe rendering for client-only state.
+
+### Progress
+
+- Backend-powered homepage products completed.
+- Popular products API integration completed.
+- Homepage section composition completed.
+- Search navigation integration completed.
+- Cart badge integration completed.
+- Authentication-aware navbar completed.
+- Admin navigation visibility completed.
+- Shared navigation workflow completed.
+- Responsive customer navigation completed.
+
+### API Workflow
+
+#### Homepage Products Flow
+
+```text
+Customer Visits Homepage
+→ PopularProducts Mounts
+→ Request /api/products
+→ Fetch Product Data
+→ Store Products In State
+→ Limit Display Items
+→ Render Product Cards
+```
+
+#### Search Workflow
+
+```text
+Customer Enters Search
+→ Submit Search Form
+→ Validate Query
+→ Generate URL Parameter
+→ Navigate To Search Page
+→ Display Matching Results
+```
+
+#### Navigation Workflow
+
+```text
+Page Load
+→ Load Auth State
+→ Load Cart State
+→ Determine User Role
+→ Render Navigation Actions
+→ Enable Search / Cart / Account Access
+```
+
+### Concepts Covered
+
+- Frontend API Integration
+- Client-Side Data Fetching
+- Shared Layout Architecture
+- State-Driven UI
+- Authentication-Aware Rendering
+- Role-Based Navigation
+- Search Navigation
+- Cart State Synchronization
+- Component Composition
+- Responsive Navigation
+
+### Approach
+
+- Consume product data directly from backend APIs.
+- Keep homepage sections modular and reusable.
+- Centralize navigation inside a shared layout.
+- Render user actions based on authentication state.
+- Keep search state URL-driven.
+- Separate data loading from presentation components.
+
+### Techniques Used
+
+- Fetch API
+- React useEffect
+- React useState
+- Conditional Rendering
+- Next.js App Router Navigation
+- URL Query Parameters
+- Shared Layout Composition
+- Context API Integration
+- Hydration-Safe Rendering
+- Reusable Component Architecture
+
+### Files Updated
+
+```text
+app/(shop)/(customer)/page.tsx
+
+components/home/
+└── PopularProducts.tsx
+
+components/navigation/
+└── Navbar.tsx
+```
+
+### Backend Integration Pattern
+
+Frontend Component
+→ API Request
+→ Backend Route Handler
+→ MongoDB Query
+→ JSON Response
+→ Component State Update
+→ UI Rendering

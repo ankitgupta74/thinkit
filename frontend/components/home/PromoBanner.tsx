@@ -31,6 +31,7 @@ function PromoBanner() {
         <Image
           src="/assets/delivery_truck.svg"
           alt="Delivery Truck"
+          loading="eager"
           width={500}
           height={300}
           className="w-full max-w-60 sm:max-w-120 xl:pr-10"

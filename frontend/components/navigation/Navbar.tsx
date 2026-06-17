@@ -1,6 +1,8 @@
 "use client";
 
-import { useCart } from "@/context/cart/useCart";
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowUpRightIcon,
   ChevronDownIcon,
@@ -15,32 +17,31 @@ import {
   UserIcon,
   XIcon,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useCart } from "@/context/cart/useCart";
+import { useAuth } from "@/context/auth/useAuth";
+import Loader from "../ui/Loader";
 
-type User = {
-  name: string;
-  email: string;
-  isAdmin: boolean;
-};
-
+// Main navigation bar used throughout the application.
+// Provides access to search, cart, account and key pages.
 function Navbar() {
   const router = useRouter();
 
-  const user: User = {
-    name: "John Doe",
-    email: "john@example.com",
-    isAdmin: true,
-  };
+  // Authentication state shared across the application.
+  const { user, loading, logout } = useAuth();
 
+  // Cart information used for badge counts and cart drawer access.
   const { cartCount, setIsCartOpen } = useCart();
 
+  // Stores the user's current search input.
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Controls visibility of the account dropdown menu.
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
+  // Prevents hydration mismatch issues for client-only values.
   const [mounted, setMounted] = useState(false);
 
+  // Marks component as fully mounted on the client.
   useEffect(() => {
     const timer = setTimeout(() => {
       setMounted(true);
@@ -49,20 +50,29 @@ function Navbar() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Redirect users to the search page using their query.
   const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    // Remove accidental spaces from the search input.
     const query = searchQuery.trim();
 
     if (!query) return;
 
+    // Navigate to search results page.
     router.push(`/search?q=${encodeURIComponent(query)}`);
 
     setSearchQuery("");
   };
 
-  const handleLogout = () => {
+  // Sign the user out and return them to the homepage.
+  const handleLogout = async () => {
     setUserMenuOpen(false);
+
+    await logout();
+
+    router.push("/");
+    router.refresh();
   };
 
   return (
@@ -103,12 +113,15 @@ function Navbar() {
           {/* Right Actions */}
           <div className="flex items-center gap-3">
             {/* Cart */}
+            {/* Opens shopping cart drawer */}
             <button
               type="button"
               className="relative p-2 rounded-xl"
               onClick={() => setIsCartOpen(true)}
             >
               <ShoppingCartIcon className="size-5 text-zinc-900" />
+              {/* Display current number of items in cart */}
+              {/* Cart count comes from client state, so wait until hydration finishes. */}
               {mounted && cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 size-4 bg-app-orange text-white text-[10px] rounded-full flex-center">
                   {cartCount}
@@ -117,7 +130,11 @@ function Navbar() {
             </button>
             {/* User */}
             <div className="relative">
-              {user ? (
+              {/* Wait for authentication state before rendering user actions */}
+              {loading ? (
+                <Loader />
+              ) : // Logged-in user account access
+              user ? (
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   type="button"
@@ -129,6 +146,7 @@ function Navbar() {
                   <ChevronDownIcon className="size-3 text-zinc-500" />
                 </button>
               ) : (
+                // Guest user actions
                 <div className="flex-center gap-2">
                   <Link
                     href="/login"
@@ -136,6 +154,7 @@ function Navbar() {
                   >
                     <UserIcon size={16} /> Sign In
                   </Link>
+                  {/* Account menu containing user-related actions */}
                   {userMenuOpen ? (
                     <XIcon
                       className="md:hidden"
@@ -156,6 +175,7 @@ function Navbar() {
                     onClick={() => setUserMenuOpen(false)}
                   />
                   <div className="absolute right-0 mt-2.5 w-56 bg-white rounded-xl shadow-lg border border-app-border py-2 z-50 animate-fade-in">
+                    {/* Quick summary of the current logged-in user */}
                     {user && (
                       <div className="px-4 py-2 border-b border-app-border">
                         <p className="text-sm font-medium text-zinc-900">
