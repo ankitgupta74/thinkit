@@ -209,7 +209,7 @@ export async function PUT(
         isOrganic: Boolean(isOrganic),
       },
       {
-        new: true,
+        returnDocument: "after",
       },
     );
 
