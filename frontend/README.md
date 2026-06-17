@@ -2875,3 +2875,100 @@ User Logout
 - Authentication Lifecycle Management
 - Client-side Session Refresh
 - Shared Application Providers
+
+## Implement Address Management, Admin Dashboard & Delivery Partner APIs
+
+- create customer address management APIs
+- implement address CRUD operations with ownership validation
+- add authenticated address retrieval and creation workflows
+- build admin dashboard statistics endpoint
+- integrate business metrics aggregation for orders, users, products and riders
+- implement delivery partner management APIs
+- add delivery partner authentication system using dedicated cookies
+- create rider login, logout and profile APIs
+- implement rider order management and assigned delivery workflows
+- add delivery partner authorization helper for protected rider routes
+
+### Progress
+
+- customer address backend completed
+- address update and deletion workflow completed
+- admin dashboard analytics API completed
+- delivery partner management system completed
+- delivery partner authentication completed
+- rider session management completed
+- rider assigned orders API completed
+- admin controlled rider creation and update completed
+- role-based API protection completed
+
+### Address API Flow
+
+```text
+Customer Request
+→ Verify Login
+→ Verify Address Ownership
+→ Read / Create / Update / Delete Address
+→ Return Address Data
+```
+
+### Admin Dashboard Flow
+
+```text
+Admin Request
+→ Verify Admin Access
+→ Collect System Metrics
+→ Fetch Recent Orders
+→ Return Dashboard Data
+```
+
+### Delivery Partner Authentication Flow
+
+```text
+Rider Login
+→ Verify Email & Password
+→ Generate JWT
+→ Save delivery-token Cookie
+→ Rider Authenticated
+```
+
+### Delivery Partner Order Flow
+
+```text
+Rider Request
+→ Verify Rider Session
+→ Fetch Assigned Orders
+→ Populate Customer Details
+→ Return Delivery Queue
+```
+
+### Concept
+
+- customer-specific resource ownership
+- role-based access control
+- multi-authentication architecture
+- rider authentication isolation
+- dashboard analytics aggregation
+- protected business operations
+
+### Approach
+
+- secure every endpoint using authentication middleware
+- separate customer, admin and rider access layers
+- validate ownership before modifying resources
+- use JWT cookie-based sessions for riders
+- centralize delivery partner authentication logic
+- aggregate dashboard data directly from database collections
+
+### Techniques Used
+
+- Next.js Route Handlers
+- JWT Authentication
+- HTTP-only Cookie Sessions
+- Role-Based Authorization
+- Resource Ownership Validation
+- Mongoose CRUD Operations
+- MongoDB Aggregation Metrics
+- Protected API Architecture
+- Multi-Role Authentication System
+- Document Population
+- Centralized Auth Helpers
