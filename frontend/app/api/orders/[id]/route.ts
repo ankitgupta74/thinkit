@@ -1,3 +1,10 @@
+// Order details and order management endpoint.
+
+// Supports:
+// GET    → View order details
+// PATCH  → Cancel order
+// DELETE → Permanently remove order (Admin)
+
 import { NextRequest, NextResponse } from "next/server";
 
 import { connectDB } from "@/lib/mongodb";
@@ -146,12 +153,13 @@ export async function PATCH(
       {
         status,
 
+        // Append the new status entry without removing older history.
         $push: {
           statusHistory: statusEntry,
         },
       },
       {
-        new: true,
+        returnDocument: "after",
       },
     );
 
@@ -189,7 +197,6 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {

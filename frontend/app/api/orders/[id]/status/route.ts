@@ -67,11 +67,33 @@ export async function PUT(
     }
 
     // Only allow statuses that exist in our workflow
+    // Prevent invalid or misspelled statuses from entering the system.
     if (!ORDER_STATUSES.includes(status)) {
       return NextResponse.json(
         {
           success: false,
           message: "Invalid order status",
+        },
+        {
+          status: 400,
+        },
+      );
+    }
+
+    // Delivery-related statuses require a rider
+    // These stages require an assigned rider.
+    const deliveryStatuses = [
+      "Packed",
+      "Assigned",
+      "Out for Delivery",
+      "Delivered",
+    ];
+
+    if (deliveryStatuses.includes(status) && !order.deliveryPartner) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Assign a delivery partner before updating delivery status",
         },
         {
           status: 400,
@@ -98,7 +120,7 @@ export async function PUT(
         statusHistory: history, // Store all previous status changes together with the new one
       },
       {
-        new: true, // Return the updated version after the change
+        returnDocument: "after", // Return the updated version after the change
       },
     );
 

@@ -1,9 +1,22 @@
+// Customer order endpoint.
+
+// GET  → Fetch order history
+// POST → Create a new order
+
+// Order Creation Flow:
+// Customer Checkout
+// → Validate Products
+// → Verify Stock
+// → Create Order
+// → Reduce Inventory
+// → Trigger Low Stock Alerts
+// → Trigger Rider Assignment Workflow
+// → Return Completed Order
+
 import { NextRequest, NextResponse } from "next/server";
-
+import { inngest } from "@/inngest/client";
 import { connectDB } from "@/lib/mongodb";
-
 import Order from "@/models/Order";
-
 import "@/models/DeliveryPartner";
 import "@/models/Product";
 import "@/models/User";
@@ -210,7 +223,23 @@ export async function POST(request: NextRequest) {
           stock: -item.quantity,
         },
       });
+
+      // Notify inventory workflows about stock changes.
+      await inngest.send({
+        name: "inventory/stock.updated",
+        data: {
+          productId: item.product,
+        },
+      });
     }
+
+    // Start post-order automation workflows.
+    await inngest.send({
+      name: "order/placed",
+      data: {
+        orderId: order._id.toString(),
+      },
+    });
 
     // Return fully populated order data for immediate UI updates
     const populatedOrder = await Order.findById(order._id)
