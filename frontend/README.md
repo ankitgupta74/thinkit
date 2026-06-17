@@ -2972,3 +2972,93 @@ Rider Request
 - Multi-Role Authentication System
 - Document Population
 - Centralized Auth Helpers
+
+## Integrate Authentication UI With Backend APIs
+
+- connect customer login and registration pages with authentication APIs
+- integrate delivery partner login page with rider authentication API
+- connect frontend authentication flow with JWT cookie sessions
+- integrate AuthContext with backend user session endpoints
+- implement automatic user state synchronization after login and logout
+- add authenticated route redirection logic
+- connect application layout with global authentication provider
+- integrate protected user session management across the application
+
+### Progress
+
+- customer authentication frontend connected with backend APIs
+- delivery partner authentication frontend connected with backend APIs
+- AuthContext setup completed
+- global authentication state management completed
+- session persistence completed
+- automatic user loading completed
+- login, register and logout lifecycle completed
+- protected page redirection completed
+- root layout authentication integration completed
+
+### Customer Authentication Flow
+
+```text
+Login / Register Form
+→ Call Auth API
+→ Validate Credentials
+→ Generate JWT Cookie
+→ Refresh AuthContext
+→ Update Global User State
+→ Redirect User
+```
+
+### Delivery Partner Authentication Flow
+
+```text
+Delivery Login Form
+→ Call Rider Login API
+→ Verify Credentials
+→ Generate delivery-token Cookie
+→ Create Rider Session
+→ Redirect To Delivery Dashboard
+```
+
+### AuthContext Flow
+
+```text
+App Startup
+→ AuthProvider Mounts
+→ Call /api/auth/me
+→ Load Current User
+→ Store User In Context
+→ Share User Across Application
+```
+
+### Concept
+
+- frontend-backend authentication integration
+- centralized authentication state management
+- cookie-based session handling
+- global user state sharing
+- role-specific authentication flows
+- authenticated navigation control
+
+### Approach
+
+- use API routes as the single authentication source
+- store authentication state inside React Context
+- reload user information from backend after auth actions
+- use HTTP-only cookies for session persistence
+- wrap application with shared authentication provider
+- synchronize frontend state with backend session state
+
+### Techniques Used
+
+- Next.js Route Handlers
+- React Context API
+- Custom Hooks Pattern
+- JWT Cookie Authentication
+- Client-Side API Integration
+- Protected Route Redirection
+- Global State Management
+- Session Persistence
+- useEffect Authentication Hydration
+- Context Provider Architecture
+- Form Submission Workflows
+- Role-Based Authentication

@@ -10,6 +10,15 @@
   - Future API integration
 =========================== */
 
+// Authentication Architecture:
+//
+// Login/Register Form
+// → Auth API
+// → Cookie Created
+// → refreshUser()
+// → AuthContext Updated
+// → Entire App Receives User State
+
 import {
   Loader2Icon,
   LockIcon,
@@ -19,7 +28,9 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react"
+import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@/context/auth/useAuth";
 
 function Login() {
   /* ===========================
@@ -32,7 +43,19 @@ function Login() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
-/* ===========================
+  const router = useRouter();
+
+  // Global authentication state shared across the application
+  const { user, loading: authLoading, refreshUser } = useAuth();
+
+  // Prevent logged-in users from visiting the auth page again.
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace("/");
+    }
+  }, [authLoading, user, router]);
+
+  /* ===========================
   Form Submit Handler
 
   Current:
@@ -42,10 +65,61 @@ function Login() {
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
+    try {
+      // Choose login or registration endpoint based on current mode.
+      const endpoint = isLoginState ? "/api/auth/login" : "/api/auth/register";
+
+      // Build request body expected by the backend API.
+      const payload = isLoginState
+        ? {
+            email,
+            password,
+          }
+        : {
+            name,
+            email,
+            password,
+          };
+
+      // Send authentication request to the server.
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+
+      // Sync AuthContext with the newly created session.
+      await refreshUser();
+
+      // Move user into the storefront after authentication.
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+
+      alert(error instanceof Error ? error.message : "Login failed");
+    } finally {
       setLoading(false);
-      window.location.href = "/";
-    }, 1000);
+    }
+  };
+
+  // Wait until authentication status is known.
+  if (authLoading) {
+    return null;
+  }
+
+  // Redirect logic handles authenticated users.
+  if (user) {
+    return null;
   }
 
   return (
@@ -80,13 +154,19 @@ function Login() {
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center gap-2 mb-6">
               <ShoppingBasket className="size-8 text-app-green" />
-              <span className="text-2xl font-semibold text-app-green">Thinkit</span>
+              <span className="text-2xl font-semibold text-app-green">
+                Thinkit
+              </span>
             </Link>
             <h1 className="text-2xl font-semibold text-app-green mb-2">
-              {isLoginState ? "Sign in to your account" : "Sign up for an account"}
+              {isLoginState
+                ? "Sign in to your account"
+                : "Sign up for an account"}
             </h1>
             <p className="text-sm text-app-text-light">
-              {isLoginState ? "Don't have an account?" : "Already have an account?"}
+              {isLoginState
+                ? "Don't have an account?"
+                : "Already have an account?"}
               <button
                 type="button"
                 className="text-orange-500 ml-1 font-semibold hover:text-orange-600 transition-colors"
@@ -115,32 +195,32 @@ function Login() {
               </label>
             )}
             <label htmlFor="" className="text-sm flex flex-col gap-1">
-                Email Address
-                <div className="relative">
-                  <MailIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-app-text-light" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    placeholder="thinkit@example.com"
-                    className="w-full pl-11 pr-4 py-3 text-sm bg-white rounded-xl border not-focus:border-app-border transition-all"
-                  />
-                </div>
-              </label>
+              Email Address
+              <div className="relative">
+                <MailIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-app-text-light" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="thinkit@example.com"
+                  className="w-full pl-11 pr-4 py-3 text-sm bg-white rounded-xl border not-focus:border-app-border transition-all"
+                />
+              </div>
+            </label>
             <label htmlFor="" className="text-sm flex flex-col gap-1">
-                Password
-                <div className="relative">
-                  <LockIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-app-text-light" />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    placeholder="12345678"
-                    className="w-full pl-11 pr-4 py-3 text-sm bg-white rounded-xl border not-focus:border-app-border transition-all"
-                  />
-                </div>
+              Password
+              <div className="relative">
+                <LockIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-app-text-light" />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="12345678"
+                  className="w-full pl-11 pr-4 py-3 text-sm bg-white rounded-xl border not-focus:border-app-border transition-all"
+                />
+              </div>
             </label>
             {/* Auth submit button with loading state */}
             <button
@@ -148,13 +228,19 @@ function Login() {
               disabled={loading}
               className="flex-center w-full py-3 bg-green-950 text-white font-semibold rounded-xl hover:bg-green-900 transition-colors disabled:opacity-50"
             >
-              {loading ? <Loader2Icon className="animate-spin" /> :  isLoginState ? "Sign In" : "Sign up"}
+              {loading ? (
+                <Loader2Icon className="animate-spin" />
+              ) : isLoginState ? (
+                "Sign In"
+              ) : (
+                "Sign up"
+              )}
             </button>
           </form>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default Login
