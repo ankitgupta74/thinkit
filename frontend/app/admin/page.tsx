@@ -1,3 +1,10 @@
+// Dashboard Flow:
+//
+// Fetch Dashboard Data
+// → Build Summary Cards
+// → Show Recent Orders
+// → Navigate To Management Pages
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -10,7 +17,7 @@ import {
 import Link from "next/link";
 import { CURRENCY } from "@/utils/config";
 import Loader from "@/components/ui/Loader";
-import { dummyAdminDashboardData, statusColors } from "@/public/assets";
+import { statusColors } from "@/public/assets";
 
 interface RecentOrder {
   _id: string;
@@ -44,18 +51,31 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load dashboard data when the page first opens
-    setTimeout(() => {
-      // Temporary data until backend APIs are connected
-      setStats(dummyAdminDashboardData);
+    // Load dashboard statistics and recent activity.
+    const fetchDashboard = async () => {
+      try {
+        // Fetch admin dashboard data from backend.
+        const response = await fetch("/api/admin/dashboard");
 
-      // Hide loader once dashboard data is ready
-      setLoading(false);
-    }, 1000);
+        const data = await response.json();
+
+        if (data.success) {
+          // Store dashboard data for cards and tables.
+          setStats(data);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboard();
   }, []);
 
   // Build dashboard cards from data.
   // Makes the UI easier to maintain and expand.
+  // Convert API data into UI card configuration.
   const cards = stats
     ? [
         {
@@ -64,7 +84,6 @@ export default function AdminDashboard() {
           // Store icon components in data so UI can render them dynamically
           icon: ShoppingBagIcon,
         },
-        { label: "Total Users", value: stats.totalUsers, icon: UsersIcon },
         {
           label: "Total Products",
           value: stats.totalProducts,
@@ -74,6 +93,16 @@ export default function AdminDashboard() {
           label: "Out of Stock",
           value: stats.outOfStock,
           icon: AlertTriangleIcon,
+        },
+        {
+          label: "Total Users",
+          value: stats.totalUsers,
+          icon: UsersIcon,
+        },
+        {
+          label: "Total Partners",
+          value: stats.totalPartners,
+          icon: UsersIcon,
         },
       ]
     : [];
@@ -85,7 +114,7 @@ export default function AdminDashboard() {
     // Main dashboard content
     <div className="space-y-6">
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {/* Create dashboard cards from configuration data */}
         {cards.map((card) => (
           <div
@@ -145,7 +174,7 @@ export default function AdminDashboard() {
                   </td>
                 </tr>
               ) : (
-                // Render one table row for each recent order
+                // Render latest orders for quick admin overview
                 stats?.recentOrders.map((order) => (
                   <tr
                     key={order._id}

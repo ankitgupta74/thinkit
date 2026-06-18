@@ -1,10 +1,17 @@
+// Delivery Access Flow:
+//
+// Verify Session
+// → Load Partner Profile
+// → Render Delivery Pages
+// → Logout When Needed
+
 "use client";
 
 import { LogOutIcon, TruckIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { dummyDeliveryPartnerData } from "@/public/assets";
 import { DeliveryPartner } from "@/types";
+import Loader from "@/components/ui/Loader";
 
 export default function DeliveryLayout({
   children,
@@ -15,16 +22,54 @@ export default function DeliveryLayout({
   // Used for page navigation without refreshing the browser
   const router = useRouter();
 
-  // Currently using dummy partner data.
-  // Later this can come from an API, context, or authentication system.
-  const [partner] = useState<DeliveryPartner>(dummyDeliveryPartnerData[0]);
+  // Logged-in delivery partner information loaded from backend.
+  const [partner, setPartner] = useState<DeliveryPartner | null>(null);
 
-  const handleLogout = () => {
-    // Redirect user back to login page after logout
-    router.push("/delivery/login");
+  // Prevent layout from rendering before auth check finishes.
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Verify delivery partner session and load profile.
+    const fetchPartner = async () => {
+      try {
+        // Check whether a delivery partner is currently logged in.
+        const response = await fetch("/api/deliveryPartners/auth/me");
+
+        const data = await response.json();
+
+        if (!data.success) {
+          router.push("/delivery/login");
+          return;
+        }
+
+        setPartner(data.partner);
+      } catch (error) {
+        console.error(error);
+
+        // Invalid session → return to delivery login page.
+        router.push("/delivery/login");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPartner();
+  }, [router]);
+
+  // End delivery partner session.
+  const handleLogout = async () => {
+    // Remove delivery authentication cookie.
+    await fetch("/api/deliveryPartners/auth/logout", {
+      method: "POST",
+    });
+
+    router.push("/");
   };
 
   // Don't render the layout until partner data is available
+  if (loading) return <Loader />;
+
+  // Do not render protected delivery pages without a valid partner.
   if (!partner) return null;
 
   return (

@@ -1,7 +1,14 @@
+// Admin Access Flow:
+//
+// Check Auth State
+// → Verify Admin Role
+// → Redirect Unauthorized Users
+// → Render Admin Dashboard
+
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   PlusIcon,
   PackageSearchIcon,
@@ -12,6 +19,9 @@ import {
   Truck,
 } from "lucide-react";
 import Navbar from "@/components/navigation/Navbar";
+import { useEffect } from "react";
+import { useAuth } from "@/context/auth/useAuth";
+import Loader from "@/components/ui/Loader";
 
 export default function AdminLayout({
   children,
@@ -54,9 +64,37 @@ export default function AdminLayout({
     },
   ];
 
+  const router = useRouter();
+
+  // Get current logged-in user from global auth state.
+  const { user, loading } = useAuth();
+
+  // Protect admin routes from guests and non-admin users.
+  useEffect(() => {
+    // Guest users must login first.
+    if (!loading && !user) {
+      router.replace("/login");
+    }
+
+    // Logged-in users without admin rights cannot access admin pages.
+    if (!loading && user && !user.isAdmin) {
+      router.replace("/");
+    }
+  }, [loading, user, router]);
+
   // Gives the current URL path.
   // Used to highlight the active sidebar link.
   const pathname = usePathname();
+
+  // Wait until authentication check finishes.
+  if (loading) {
+    return <Loader />;
+  }
+
+  // Stop rendering until access is verified.
+  if (!user || !user.isAdmin) {
+    return null;
+  }
 
   return (
     // Main admin layout wrapper

@@ -1,8 +1,15 @@
+// Delivery Workflow:
+//
+// Load Assigned Orders
+// → Accept / Update Delivery Status
+// → Share Location
+// → Verify OTP
+// → Complete Delivery
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { PackageIcon, NavigationIcon } from "lucide-react";
-import { dummyDashboardOrdersData } from "@/public/assets";
 import Loader from "@/components/ui/Loader";
 import DeliveryOrderCard from "@/components/delivery/DeliveryOrderCard";
 import OtpModal from "@/components/delivery/OTPModal";
@@ -42,17 +49,39 @@ export default function DeliveryDashboard() {
   const [cancelReason, setCancelReason] = useState("");
 
   useEffect(() => {
+    // Load orders assigned to the current delivery partner.
     const loadOrders = async () => {
-      // Show loader before fetching data
-      setLoading(true);
+      try {
+        setLoading(true);
 
-      await Promise.resolve();
+        // Fetch rider-specific orders from backend.
+        const response = await fetch("/api/deliveryPartners/order");
 
-      // Temporary dummy data until API integration
-      setOrders(dummyDashboardOrdersData as Order[]);
+        const data = await response.json();
 
-      // Hide loader after data is ready
-      setLoading(false);
+        if (!data.success) {
+          setOrders([]);
+          return;
+        }
+
+        // Split orders into active and completed views.
+        const filteredOrders =
+          tab === "active"
+            ? data.orders.filter(
+                (order: Order) =>
+                  !["Delivered", "Cancelled"].includes(order.status),
+              )
+            : data.orders.filter((order: Order) =>
+                ["Delivered", "Cancelled"].includes(order.status),
+              );
+
+        setOrders(filteredOrders);
+      } catch (error) {
+        console.error(error);
+        setOrders([]);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadOrders();
@@ -60,11 +89,13 @@ export default function DeliveryDashboard() {
     // Reload orders whenever the selected tab changes
   }, [tab]);
 
+  // Future: update delivery progress in database.
   const handleUpdateStatus = async (orderId: string, status: string) => {
     // Later this will call an API to update order status
     console.log(orderId, status);
   };
 
+  // Verify OTP before marking order as delivered.
   const handleComplete = async () => {
     // Don't continue if order or OTP is missing
     if (!otpModal || !otp) return;
@@ -80,6 +111,7 @@ export default function DeliveryDashboard() {
     }, 1000);
   };
 
+  // Cancel delivery and store cancellation reason.
   const handleCancel = async () => {
     // Don't continue if no order is selected
     if (!cancelModal) return;
