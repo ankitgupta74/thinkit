@@ -1,15 +1,22 @@
+// Address Flow:
+//
+// Load Addresses
+// → Create / Edit / Delete
+// → Refresh List
+// → Keep UI In Sync With Database
+
 "use client";
 
 import AddressCard from "@/components/address/AddressCard";
 import AddressForm from "@/components/address/AddressForm";
 import Loader from "@/components/ui/Loader";
-import { dummyAddressData } from "@/public/assets";
 import type { Address } from "@/types";
 import { MapPinIcon, PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
+// Customer address management page.
 function Address() {
-  const [addresses, setAddresses] = useState<Address[]>(dummyAddressData);
+  const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, seteditingId] = useState<string | null>(null);
@@ -22,6 +29,7 @@ function Address() {
     isDefault: false,
   });
 
+  // Return form back to create mode after save or cancel.
   const resetForm = () => {
     setForm({
       label: "",
@@ -35,34 +43,67 @@ function Address() {
     seteditingId(null);
   };
 
+  // Load saved addresses belonging to the logged-in user.
+  const loadAddresses = async () => {
+    // Fetch addresses from backend API.
+    const response = await fetch("/api/addresses", {
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setAddresses(data.addresses);
+    }
+  };
+
+  // Handles both create and update address operations.
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
 
+    // Edit mode: update existing address.
     if (editingId) {
-      setAddresses((prev) =>
-        prev.map((add) =>
-          add._id === editingId
-            ? {
-                ...add,
-                ...form,
-              }
-            : add,
-        ),
-      );
-    } else {
-      const newAddress: Address = {
-        _id: crypto.randomUUID(),
-        ...form,
-        lat: 0,
-        lng: 0,
-      };
+      const response = await fetch(`/api/addresses/${editingId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(form),
+      });
 
-      setAddresses((prev) => [newAddress, ...prev]);
+      if (response.ok) {
+        await loadAddresses();
+      }
+
+      resetForm();
+
+      return;
+    }
+    // Create mode: add a new address.
+    else {
+      const response = await fetch("/api/addresses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(form),
+      });
+
+      if (response.ok) {
+        try {
+          await loadAddresses();
+        } catch (error) {
+          console.error(error);
+        }
+      }
     }
 
     resetForm();
   };
 
+  // Populate form with existing address data for editing.
   const onEditHandler = (add: Address) => {
     setForm({
       label: add.label,
@@ -76,16 +117,40 @@ function Address() {
     setShowForm(true);
   };
 
-  const onDeleteHandler = (id: string) => {
-    setAddresses((prev) => prev.filter((add) => add._id !== id));
+  // Remove address and refresh list.
+  const onDeleteHandler = async (id: string) => {
+    try {
+      const response = await fetch(`/api/addresses/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        await loadAddresses();
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1000);
+    // Initial page load.
+    async function initializeAddresses() {
+      try {
+        await loadAddresses();
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-    return () => clearTimeout(timer);
+    initializeAddresses();
   }, []);
 
+  if (loading) {
+    return <Loader />;
+  }
   return (
     <div className="min-h-screen bg-app-cream">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -3225,3 +3225,90 @@ implement dynamic product catalog and checkout data integration
 - Authenticated User Data Access
 - Checkout State Management
 - External Image Configuration
+
+implement authenticated customer workflows with live backend integration
+
+- create protected route layout using AuthContext-based access control
+- connect address management page with address CRUD APIs
+- implement address loading, creation, editing and deletion workflows
+- integrate checkout flow with authenticated customer addresses
+- connect checkout process with order creation API
+- implement dynamic order history using customer-specific order data
+- integrate detailed order tracking with live order and location APIs
+- connect delivery partner information and order timeline data
+- synchronize cart, checkout and order lifecycle with backend database
+
+### Progress
+
+- protected customer routes secured through centralized authentication checks
+- address management fully connected with backend APIs
+- checkout flow integrated with live address and order data
+- order placement connected to backend order creation workflow
+- order history displays authenticated customer orders
+- order details page loads real order, tracking and delivery information
+- live location tracking integrated through dedicated tracking endpoints
+
+### Customer Flow
+
+- Login
+- Access Protected Routes
+- Manage Addresses
+- Select Delivery Address
+- Place Order
+- View Orders
+- Track Delivery
+
+### Address Flow
+
+- Load Addresses
+- Create / Edit / Delete Address
+- Refresh Data
+- Sync UI With Database
+
+### Checkout Flow
+
+- Load Addresses
+- Select Address
+- Select Payment Method
+- Review Order
+- Create Order
+- Redirect To Orders
+
+### Order Tracking Flow
+
+- Load Order
+- Load Live Location
+- Show Timeline
+- Show Delivery Partner
+- Track Delivery Progress
+
+### Concept
+
+- authenticated customer experience
+- protected route architecture
+- API-driven order lifecycle
+- centralized address management
+- real-time delivery tracking
+- customer-specific data access
+
+### Approach
+
+- use AuthContext as the frontend authentication source
+- protect sensitive pages through shared layout guards
+- fetch customer-specific data from secured APIs
+- separate address, checkout and order responsibilities
+- synchronize frontend state with backend records
+- use dedicated endpoints for tracking and order details
+
+### Techniques Used
+
+- Protected Layout Pattern
+- React Context Authentication
+- Route Guarding
+- CRUD API Integration
+- Dynamic Route Parameters
+- Order Lifecycle Management
+- Live Tracking Requests
+- State Synchronization
+- Conditional Rendering
+- Customer Ownership Validation

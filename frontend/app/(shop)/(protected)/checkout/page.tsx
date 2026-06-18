@@ -1,12 +1,21 @@
+// Checkout Flow:
+//
+// Load Addresses
+// → Select Address
+// → Select Payment
+// → Review Order
+// → Create Order
+// → Redirect To Orders
+
 "use client";
 
 import CheckoutAddress from "@/components/checkout/CheckoutAddress";
 import CheckoutPayment from "@/components/checkout/CheckoutPayment";
 import CheckoutReview from "@/components/checkout/CheckoutReview";
 import { useCart } from "@/context/cart/useCart";
-import { dummyAddressData } from "@/public/assets";
 import { Address } from "@/types";
 import { CURRENCY } from "@/utils/config";
+import Loader from "@/components/ui/Loader";
 import {
   ArrowLeft,
   CheckIcon,
@@ -15,33 +24,67 @@ import {
   MapPinIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
+// Multi-step checkout process.
 function Checkout() {
   const router = useRouter();
-  const { items, cartTotal } = useCart();
-  const { user } = { user: { addresses: dummyAddressData } };
+  const { items, cartTotal, clearCart } = useCart();
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [address, setAddress] = useState<Address | null>(null);
+  const [addressesLoading, setAddressesLoading] = useState(true);
   const [step, setStep] = useState("address");
-  const defaultAddress =
-    user.addresses.find((add) => add.isDefault) || user.addresses[0];
 
-  const [address, setAddress] = useState<Address>({
-    _id: defaultAddress?._id || "",
-    label: defaultAddress?.label || "Home",
-    address: defaultAddress?.address || "",
-    city: defaultAddress?.city || "",
-    state: defaultAddress?.state || "",
-    zip: defaultAddress?.zip || "",
-    isDefault: defaultAddress?.isDefault || false,
-    lat: defaultAddress?.lat || 0,
-    lng: defaultAddress?.lng || 0,
-  });
+  // Load customer addresses for checkout.
+  useEffect(() => {
+    async function loadAddresses() {
+      try {
+        // Fetch saved delivery addresses.
+        const response = await fetch("/api/addresses", {
+          credentials: "include",
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          const loadedAddresses = data.addresses || [];
+
+          setAddresses(loadedAddresses);
+
+          // Prefer default address, otherwise use first saved address.
+          const defaultAddress =
+            loadedAddresses.find((a: Address) => a.isDefault) ||
+            loadedAddresses[0];
+
+          if (defaultAddress) {
+            setAddress(defaultAddress);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setAddressesLoading(false);
+      }
+    }
+
+    loadAddresses();
+  }, []);
+
+  // Selected payment option.
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [loading, setLoading] = useState(false);
+
+  // Free delivery for qualifying orders.
   const deliveryFee = cartTotal > 149 ? 0 : 99;
   const tax = cartTotal * 0.08;
   const total = cartTotal + deliveryFee + tax;
-  const steps: { key: string; label: string; icon: typeof MapPinIcon }[] = [
+
+  // Checkout progress indicator.
+  const steps: {
+    key: string;
+    label: string;
+    icon: typeof MapPinIcon;
+  }[] = [
     {
       key: "address",
       label: "Address",
@@ -58,10 +101,57 @@ function Checkout() {
       icon: CheckIcon,
     },
   ];
+
+  // Convert checkout data into a backend order.
   const handlePlaceOrder = async () => {
-    setLoading(true);
-    router.push("/orders");
+    try {
+      setLoading(true);
+
+      // Send order creation request to backend.
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          // Send only essential order data to backend.
+          items: items.map((item) => ({
+            product: item.product._id,
+            quantity: item.quantity,
+          })),
+
+          shippingAddress: address,
+
+          paymentMethod,
+        }),
+      });
+
+      const data = await response.json();
+
+      console.log("Create Order Response:", data);
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to create order");
+      }
+
+      // Order completed successfully.
+      clearCart();
+
+      // Redirect customer to order history.
+      router.push("/orders");
+    } catch (error) {
+      console.error(error);
+
+      alert(error instanceof Error ? error.message : "Failed to place order");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (addressesLoading) {
+    return <Loader />;
+  }
 
   if (items.length === 0) {
     return (
@@ -98,6 +188,7 @@ function Checkout() {
         <h1 className="text-xl font-semibold text-app-green mb-8">Checkout</h1>
         {/* Steps */}
         <div className="flex items-center gap-2 mb-8">
+          {/* Render checkout progress navigation */}
           {steps.map((s, i) => (
             <div className="flex items-center gap-2" key={s.key}>
               <button
@@ -121,7 +212,7 @@ function Checkout() {
                 address={address}
                 setAddress={setAddress}
                 setStep={setStep}
-                user={user}
+                user={{ addresses }}
               />
             )}
             {step === "payment" && (

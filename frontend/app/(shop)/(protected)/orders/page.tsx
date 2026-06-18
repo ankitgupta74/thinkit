@@ -1,59 +1,67 @@
+// Orders Flow:
+//
+// Fetch Orders
+// → Filter By Status
+// → View Order Summary
+// → Open Detailed Tracking Page
+
 "use client";
 
 import Loader from "@/components/ui/Loader";
-import { useCart } from "@/context/cart/useCart";
-import { dummyDashboardOrdersData, statusColors } from "@/public/assets";
+import { statusColors } from "@/public/assets";
 import { Order } from "@/types";
 import { CURRENCY } from "@/utils/config";
-import {
-  CalendarIcon,
-  ChevronRightIcon,
-  PackageIcon
-} from "lucide-react";
+import { CalendarIcon, ChevronRightIcon, PackageIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  usePathname,
-  useRouter,
-  useSearchParams
-} from "next/navigation";
 import { useEffect, useState } from "react";
 
+// Customer order history page.
 function Orders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
 
-  const tabs = ["all", "Placed", "Out for Delivery", "Delivered"];
-  const { clearCart } = useCart();
+  // Quick order status filters.
+  const tabs = ["all", "Active", "Delivered"];
 
+  // Build visible order list based on selected tab.
+  const filteredOrders =
+    activeTab === "all"
+      ? orders
+      : activeTab === "Active"
+        ? orders.filter(
+            (o) => o.status !== "Delivered" && o.status !== "Cancelled",
+          )
+        : orders.filter((o) => o.status === activeTab);
+
+  // Load customer's order history.
   useEffect(() => {
     const loadOrders = async () => {
-      setLoading(true);
+      try {
+        setLoading(true);
 
-      const shouldClearCart = searchParams.get("clearCart");
-
-      if (shouldClearCart) {
-        clearCart();
-
-        router.replace(pathname, {
-          scroll: false,
+        // Fetch orders belonging to the logged-in user.
+        const response = await fetch("/api/orders", {
+          credentials: "include",
         });
 
-        // wait before loading
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const data = await response.json();
+        console.log("Orders API Response:", data);
+        console.log("Orders Count:", data.orders?.length);
+
+        if (data.success) {
+          // Store orders for filtering and display.
+          setOrders(data.orders);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
       }
-
-      setOrders(dummyDashboardOrdersData as Order[]);
-
-      setLoading(false);
     };
-
     loadOrders();
-  }, [searchParams, clearCart, router, pathname]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-app-cream mb-20">
@@ -75,7 +83,7 @@ function Orders() {
         {/* Orders List */}
         {loading ? (
           <Loader />
-        ) : orders.length === 0 ? (
+        ) : filteredOrders.length === 0 ? (
           <div className="text-center py-16">
             <PackageIcon className="size-16 text-app-border mx-auto mb-4" />
             <h2 className="text-lg font-medium text-app-green mb-2">
@@ -93,7 +101,7 @@ function Orders() {
           </div>
         ) : (
           <div className="space-y-4">
-            {orders.map((order) => (
+            {filteredOrders.map((order) => (
               <Link
                 href={`/orders/${order._id}`}
                 key={order._id}

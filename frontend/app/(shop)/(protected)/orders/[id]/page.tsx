@@ -1,30 +1,100 @@
+// Tracking Flow:
+//
+// Load Order
+// → Load Live Location
+// → Show Timeline
+// → Show Delivery Partner
+// → Track Delivery Progress
+
 "use client";
 
 import dynamic from "next/dynamic";
 import OrderOTP from "@/components/order/OrderOTP";
 import OrderTimeLine from "@/components/order/OrderTimeLine";
 import Loader from "@/components/ui/Loader";
-import { dummyDashboardOrdersData } from "@/public/assets";
 import type { LiveLocation, Order } from "@/types";
 import { ArrowLeftIcon, MapPinIcon, PhoneIcon } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { CURRENCY } from "@/utils/config";
+import { useEffect, useState } from "react";
 
 const LiveMap = dynamic(() => import("@/components/order/LiveMap"), {
   ssr: false,
 });
 
+// Detailed order tracking page.
 function Order() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
 
-  const liveLocation: LiveLocation | null = null;
+  // Complete order information.
+  const [order, setOrder] = useState<Order | null>(null);
 
-  const order =
-    dummyDashboardOrdersData.find((order) => order._id === id) || null;
+  const [loading, setLoading] = useState(true);
 
-  if (!order) return <Loader />;
+  // Real-time rider location for delivery tracking.
+  const [liveLocation, setLiveLocation] = useState<LiveLocation | null>(null);
+
+  // Load full order details.
+  useEffect(() => {
+    const loadOrder = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch order information from backend.
+        const response = await fetch(`/api/orders/${id}`, {
+          credentials: "include",
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          setOrder(data.order);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      loadOrder();
+    }
+  }, [id]);
+
+  // Load latest delivery location separately.
+  useEffect(() => {
+    const loadLiveLocation = async () => {
+      try {
+        // Fetch live tracking information.
+        const response = await fetch(`/api/orders/${id}/location`, {
+          credentials: "include",
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          setLiveLocation(data.liveLocation);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    if (id) {
+      loadLiveLocation();
+    }
+  }, [id]);
+
+  if (loading) {
+    return <Loader />;
+  }
+
+  if (!order) {
+    return <div className="min-h-screen flex-center">Order not found</div>;
+  }
 
   return (
     <div className="min-h-screen mb-20 bg-app-cream">
@@ -85,7 +155,8 @@ function Order() {
                         {order.deliveryPartner.name}
                       </p>
                       <p className="text-xs text-app-text-light capitalize">
-                        {order.deliveryPartner.vehicleType ?? "Unknown"} • Delivery Partner
+                        {order.deliveryPartner.vehicleType ?? "Unknown"} •
+                        Delivery Partner
                       </p>
                     </div>
                   </div>
