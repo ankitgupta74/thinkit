@@ -1,18 +1,15 @@
+// Delivery Partner Flow:
+//
+// Load Partners
+// → Create Partner
+// → Activate / Deactivate
+// → Assign To Orders
+
 "use client";
 
-import {
-  useEffect,
-  useState
-} from "react";
-import {
-  PlusIcon,
-  XIcon,
-  TruckIcon,
-  PhoneIcon,
-  MailIcon
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { PlusIcon, XIcon, TruckIcon, PhoneIcon, MailIcon } from "lucide-react";
 import { DeliveryPartner } from "@/types";
-import { dummyDeliveryPartnerData } from "@/public/assets";
 import Loader from "@/components/ui/Loader";
 
 export default function AdminDeliveryPartners() {
@@ -39,27 +36,98 @@ export default function AdminDeliveryPartners() {
   });
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      // Temporary dummy data until backend API is connected
-      setPartners(dummyDeliveryPartnerData);
+    // Load all delivery partners from backend.
+    const fetchPartners = async () => {
+      try {
+        // Fetch latest partner list for admin dashboard.
+        const response = await fetch("/api/deliveryPartners");
 
-      // Hide loader once data is ready
-      setLoading(false);
-    }, 1000);
+        const data = await response.json();
 
-    // Clean up timer when component unmounts
-    // Helps avoid memory leaks
-    return () => clearTimeout(timer);
+        if (data.success) {
+          setPartners(data.partners);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPartners();
   }, []);
 
+  // Create a new delivery partner account.
   const handleSubmit = async (e: React.SubmitEvent) => {
-    // Prevent browser refresh when submitting form
     e.preventDefault();
+
+    try {
+      setSaving(true);
+
+      // Send onboarding form data to backend.
+      const response = await fetch("/api/deliveryPartners", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await response.json();
+
+      // Update UI immediately without reloading page.
+      if (data.success) {
+        setPartners((prev) => [data.partner, ...prev]);
+
+        setForm({
+          name: "",
+          email: "",
+          password: "",
+          phone: "",
+          vehicleType: "bike",
+        });
+
+        setShowForm(false);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSaving(false);
+    }
   };
 
+  // Enable or disable a delivery partner.
   const toggleActive = async (id: string, isActive: boolean) => {
-    // Later this will call an API to activate/deactivate a partner
-    console.log(id, isActive);
+    try {
+      // Update partner active status in database.
+      const response = await fetch(`/api/deliveryPartners/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          isActive: !isActive,
+        }),
+      });
+
+      const data = await response.json();
+
+      // Keep frontend state aligned with backend response.
+      if (data.success) {
+        setPartners((prev) =>
+          prev.map((partner) =>
+            partner._id === id
+              ? {
+                  ...partner,
+                  isActive: !isActive,
+                }
+              : partner,
+          ),
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   // Show loader until partner data is available

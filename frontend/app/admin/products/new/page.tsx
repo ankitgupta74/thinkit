@@ -4,16 +4,13 @@ import {
   useState,
   useEffect
 } from "react";
-import { ArrowLeftIcon } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import {
-  categoriesData,
-  dummyProducts
-} from "@/public/assets";
 import Link from "next/link";
-import Loader from "@/components/ui/Loader";
-import { CURRENCY } from "@/utils/config";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+import { CURRENCY } from "@/utils/config";
+import { ArrowLeftIcon } from "lucide-react";
+import { categoriesData } from "@/public/assets";
+import Loader from "@/components/ui/Loader";
 
 export default function AdminProductForm() {
   const searchParams = useSearchParams();
@@ -46,15 +43,19 @@ export default function AdminProductForm() {
     isOrganic: false,
   });
 
+  // Edit mode requires existing product data.
   useEffect(() => {
     // When editing, load existing product data into the form
     const fetchData = async () => {
       if (isEdit) {
         // Find the product that matches the id from the URL
-        const product = dummyProducts.find((p) => p._id === id);
+        const response = await fetch(`/api/products/${id}`);
 
-        if (product) {
-          // Fill form fields with existing product data
+        const data = await response.json();
+
+        if (data.success) {
+          const product = data.product;
+
           setFormData({
             name: product.name,
             description: product.description,
@@ -68,15 +69,79 @@ export default function AdminProductForm() {
           });
         }
       }
+
       // Hide loader after product data is ready
       setLoading(false);
     };
     fetchData();
   }, [id, isEdit]);
 
-  const handleSubmit = async (e: React.SubmitEvent) => {
-    // Prevent page refresh when submitting the form
+  // Upload image first and return final image URL.
+  const uploadImage = async () => {
+    if (!imageFile) return formData.image;
+
+    // FormData is required for file uploads.
+    const uploadData = new FormData();
+
+    uploadData.append("image", imageFile);
+
+    // Send image file to upload endpoint.
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: uploadData,
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error("Upload failed");
+    }
+
+    return data.url;
+  };
+
+  // Handles both create and edit product operations.
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    try {
+      setSaving(true);
+
+      // Ensure image is uploaded before saving product.
+      const imageUrl = await uploadImage();
+
+      // Convert form strings into proper database types.
+      const payload = {
+        ...formData,
+        image: imageUrl,
+        price: Number(formData.price),
+        originalPrice: Number(formData.originalPrice) || 0,
+        stock: Number(formData.stock),
+      };
+
+      // Reuse same form for both product creation and editing.
+      const response = await fetch(
+        isEdit ? `/api/products/${id}` : "/api/products",
+        {
+          method: isEdit ? "PUT" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Return to products page after successful save.
+        window.location.href = "/admin/products";
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

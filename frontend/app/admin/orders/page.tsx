@@ -1,16 +1,19 @@
+// Admin Order Flow:
+//
+// Load Orders
+// → Assign Rider
+// → Update Status
+// → Sync UI With Backend
+
 "use client";
 
 import { useState, useEffect } from "react";
 import { TruckIcon } from "lucide-react";
 import toast from "react-hot-toast";
 import type { DeliveryPartner, Order } from "@/types";
-
-import {
-  dummyDashboardOrdersData,
-  dummyDeliveryPartnerData,
-} from "@/public/assets";
 import Loader from "@/components/ui/Loader";
 import { CURRENCY } from "@/utils/config";
+import { ORDER_STATUSES } from "@/lib/orderStatus";
 
 export default function AdminOrders() {
   // Stores all customer orders
@@ -29,44 +32,109 @@ export default function AdminOrders() {
   const [selectedPartner, setSelectedPartner] = useState("");
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      // Temporary dummy data until backend APIs are connected
-      setOrders(dummyDashboardOrdersData);
-      setPartners(dummyDeliveryPartnerData);
+    // Load orders and delivery partners needed for management screen.
+    const fetchData = async () => {
+      try {
+        // Fetch all customer orders.
+        const ordersResponse = await fetch("/api/orders/all");
+        const ordersData = await ordersResponse.json();
 
-      // Hide loader once data is ready
-      setLoading(false);
-    }, 1000);
+        // Fetch delivery partners for assignment dropdown.
+        const partnersResponse = await fetch("/api/deliveryPartners");
+        const partnersData = await partnersResponse.json();
 
-    // Clean up timer when component unmounts
-    return () => clearTimeout(timer);
+        if (ordersData.success) {
+          setOrders(ordersData.orders);
+        }
+
+        if (partnersData.success) {
+          setPartners(
+            partnersData.partners.filter((p: DeliveryPartner) => p.isActive),
+          );
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
+  // Update order progress status.
   const handleStatusChange = async (id: string, newStatus: string) => {
-    // Later this will update order status through an API
-    console.log(id, newStatus);
+    try {
+      // Send selected status to backend.
+      const response = await fetch(`/api/orders/${id}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: newStatus,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.message || "Failed");
+
+        return;
+      }
+
+      // Reflect status change instantly in UI.
+      if (data.success) {
+        setOrders((prev) =>
+          prev.map((order) =>
+            order._id === id ? { ...order, status: newStatus } : order,
+          ),
+        );
+
+        toast.success("Status updated");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed");
+    }
   };
 
+  // Assign selected rider to current order.
   const handleAssign = async () => {
-    // Don't continue until both order and partner are selected
     if (!assignModal || !selectedPartner) return;
-    toast.success("Delivery partner assigned!");
 
-    // Close modal and clear previous selection
-    setAssignModal(null);
-    setSelectedPartner("");
+    try {
+      // Create rider-order relationship in database.
+      const response = await fetch(`/api/orders/${assignModal}/assign`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          partnerId: selectedPartner,
+        }),
+      });
+
+      const data = await response.json();
+
+      // Replace old order with updated order data.
+      if (data.success) {
+        setOrders((prev) =>
+          prev.map((order) => (order._id === assignModal ? data.order : order)),
+        );
+
+        toast.success("Delivery partner assigned");
+
+        setAssignModal(null);
+        setSelectedPartner("");
+      }
+    } catch (error) {
+      console.error(error);
+
+      toast.error("Assignment failed");
+    }
   };
-
-  // Central list of all allowed order statuses
-  const statusOptions = [
-    "Placed",
-    "Confirmed",
-    "Assigned",
-    "Packed",
-    "Out for Delivery",
-    "Delivered",
-    "Cancelled",
-  ];
 
   // Maps each status to its badge color
   const statusColors: Record<string, string> = {
@@ -172,7 +240,7 @@ export default function AdminOrders() {
                           }}
                           className="px-3 py-1.5 text-xs font-medium bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors flex items-center gap-1"
                         >
-                          <TruckIcon className="size-3" /> Assign
+                          <TruckIcon className="size-3" /> Assign Rider
                         </button>
                       )}
                     </td>
@@ -188,7 +256,14 @@ export default function AdminOrders() {
                         className={`px-3 py-1.5 rounded-lg text-xs font-semibold border-r-8 border-transparent outline-none cursor-pointer leading-tight ${statusColors[order.status] || "bg-zinc-100 text-zinc-800"}`}
                       >
                         {/* Generate dropdown options from a single source array */}
-                        {statusOptions.map((s) => (
+                        {ORDER_STATUSES.filter((s) => {
+                          // Restrict status options when no rider is assigned yet.
+                          if (order.deliveryPartner) return true;
+
+                          return ["Placed", "Confirmed", "Cancelled"].includes(
+                            s,
+                          );
+                        }).map((s) => (
                           <option key={s} value={s}>
                             {s}
                           </option>

@@ -1,20 +1,20 @@
+// Product Management Flow:
+//
+// Load Products
+// → Create / Edit Product
+// → Upload Image
+// → Save To Database
+// → Refresh Admin View
+
 "use client";
 
-import {
-  useState,
-  useEffect
-} from "react";
-import {
-  PlusIcon,
-  EditIcon,
-  XIcon
-} from "lucide-react";
-import type { Product } from "@/types";
-import { dummyProducts } from "@/public/assets";
-import Loader from "@/components/ui/Loader";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { PlusIcon, EditIcon, XIcon } from "lucide-react";
 import { CURRENCY } from "@/utils/config";
+import type { Product } from "@/types";
+import Loader from "@/components/ui/Loader";
 
 export default function AdminProducts() {
   // Stores all products displayed in the admin table
@@ -24,28 +24,66 @@ export default function AdminProducts() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      // Temporary dummy data until API integration
-      setProducts(dummyProducts);
+    // Load all products for admin management.
+    const fetchProducts = async () => {
+      try {
+        // Fetch latest products from backend.
+        const response = await fetch("/api/products");
 
-      // Hide loader once data is ready
-      setLoading(false);
-    }, 1000);
+        const data = await response.json();
 
-    // Clean up timer when component unmounts
-    return () => clearTimeout(timer);
+        if (data.success) {
+          setProducts(data.products);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
   }, []);
 
+  // Quick stock management action.
   const handleMarkOutOfStock = async (id: string, name: string) => {
     if (
-      // Ask the admin for confirmation before making a stock change
       !window.confirm(
         `Are you sure you want to mark "${name}" as out of stock?`,
       )
-    )
+    ) {
       return;
-    // Placeholder for future API call to update stock status
-    console.log(id);
+    }
+
+    try {
+      // Find current product data before updating stock.
+      const product = products.find((p) => p._id === id);
+
+      if (!product) return;
+
+      // Reuse update endpoint and set stock to zero.
+      const response = await fetch(`/api/products/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...product,
+          stock: 0,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update UI immediately after successful change.
+        setProducts((prev) =>
+          prev.map((p) => (p._id === id ? { ...p, stock: 0 } : p)),
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   // Show loader until product data finishes loading
@@ -101,6 +139,7 @@ export default function AdminProducts() {
                         <Image
                           src={product.image}
                           alt={product.name}
+                          loading="eager"
                           width={100}
                           height={100}
                           className="size-12 rounded-lg object-cover"
@@ -135,7 +174,7 @@ export default function AdminProducts() {
                       <div className="flex items-center justify-end gap-2">
                         <Link
                           // Open product edit page
-                          href={`/admin/products/${product._id}/edit`}
+                          href={`/admin/products/new?id=${product._id}`}
                           className="p-2 text-zinc-500 hover:text-app-orange bg-zinc-100 hover:bg-orange-50 rounded-lg transition-colors"
                         >
                           <EditIcon className="size-4" />
