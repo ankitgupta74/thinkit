@@ -3062,3 +3062,87 @@ App Startup
 - Context Provider Architecture
 - Form Submission Workflows
 - Role-Based Authentication
+
+## integrate customer storefront with backend product APIs
+
+- connect homepage popular products section with products API
+- replace static product data with database-driven product fetching
+- integrate product listing page with backend filtering, sorting and pagination
+- connect flash deals page with live product catalog data
+- integrate search page with backend product inventory
+- connect product details page with dynamic product API route
+- implement related products loading using category-based matching
+- synchronize product catalog with cart functionality and URL-driven state
+
+### Progress
+
+- homepage now loads products from database APIs
+- products page fully connected with backend product endpoints
+- flash deals page uses live product inventory data
+- search page fetches and filters products from API responses
+- product details page loads dynamic product information by id
+- related products section connected with live catalog data
+- cart interactions now work with database-backed products
+- URL-driven filtering, sorting and pagination integrated with backend data
+
+### Product Catalog Flow
+
+- Customer Visits Store
+- Fetch Products API
+- Apply Filters & Sorting
+- Paginate Results
+- Render Product Grid
+
+### Product Details Flow
+
+- Read Product ID From URL
+- Fetch Product By ID
+- Load Related Products
+- Sync Cart State
+- Render Product Information
+
+### Search Flow
+
+- Read Search Query From URL
+- Fetch Product Catalog
+- Filter Matching Products
+- Display Search Results
+
+### Flash Deals Flow
+
+- Fetch Product Catalog
+- Identify Discounted Products
+- Filter In-Stock Deals
+- Paginate Results
+- Render Flash Deals
+
+### Concept
+
+- frontend-backend integration
+- API-driven product catalog
+- dynamic product rendering
+- URL-based application state
+- reusable data fetching patterns
+- database-backed storefront
+
+### Approach
+
+- use API routes as the single source of product data
+- fetch live catalog data instead of static assets
+- keep filter and pagination state inside URL parameters
+- separate UI rendering from data retrieval logic
+- reuse shared product APIs across customer pages
+
+### Techniques Used
+
+- Next.js Route Handlers
+- Client-side Data Fetching
+- Dynamic Route Integration
+- URL Search Params
+- Custom Hooks
+- Pagination Architecture
+- Category-based Product Matching
+- Loading & Error State Handling
+- API-driven UI Rendering
+- Cart State Synchronization
+- Query Parameter State Management

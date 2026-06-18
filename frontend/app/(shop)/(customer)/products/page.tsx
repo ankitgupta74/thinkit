@@ -1,3 +1,11 @@
+// Data Flow:
+//
+// URL Filters
+// → useProducts()
+// → Products API
+// → Filter / Sort / Paginate
+// → Render Product Grid
+
 "use client";
 
 import FilterPanel from "@/components/product/FilterPanel";
@@ -64,6 +72,7 @@ function Products() {
     const params = buildUpdatedParams(searchParams, key, value);
 
     // Push updated URL
+    // Update URL without a full page refresh.
     router.replace(`${pathname}?${params.toString()}`, {
       scroll: false,
     });
@@ -74,6 +83,7 @@ function Products() {
 
   // Clears every filter from URL. Example: "/products?category=snacks&minPrice=50" becomes: "/products"
   // Create a fresh empty query object... Empty query = no filters applied
+  // Reset product listing back to default state.
   const clearFilters = () => {
     const params = new URLSearchParams();
 
@@ -96,7 +106,8 @@ function Products() {
   const hasFilters = !!(category || organic || minPrice || maxPrice);
 
   // Product transformation pipeline lives in custom hook: filtering → sorting → pagination
-  const { products, totalProducts, totalPages, loading } = useProducts({
+  // Custom hook handles product fetching and transformation logic.
+  const { products, totalProducts, totalPages, loading, error } = useProducts({
     category,
     organic,
     sort,
@@ -187,7 +198,11 @@ function Products() {
               </div>
             </div>
             {/* Product Grid */}
-            {loading ? (
+            {error ? (
+              <div className="text-center py-16">
+                <p className="text-red-500">{error}</p>
+              </div>
+            ) : loading ? (
               <Loader />
             ) : products.length === 0 ? (
               <div className="text-center py-16">
@@ -220,7 +235,7 @@ function Products() {
                 )}
               </div>
             )}
-            {/* Pagination */}
+            {/* URL-driven pagination keeps state shareable and refresh-safe */}
             <Pagination
               page={page}
               totalPages={totalPages}

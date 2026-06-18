@@ -4,10 +4,17 @@ import ProductCard from "@/components/product/ProductCard";
 import Loader from "@/components/ui/Loader";
 import Pagination from "@/components/ui/Pagination";
 import usePagination from "@/hooks/usePagination";
-import { dummyProducts } from "@/public/assets";
+import { Product } from "@/types";
 import { Zap } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import {
+  useEffect,
+  useState
+} from "react";
+import {
+  useSearchParams,
+  useRouter,
+  usePathname
+} from "next/navigation";
 
 function FlashDeals() {
   // URL can store page/filter info.
@@ -24,12 +31,13 @@ function FlashDeals() {
 
   const [loading, setLoading] = useState(true);
 
+  const [products, setProducts] = useState<Product[]>([]);
+
+  const [error, setError] = useState("");
+
   // If data can be calculated, avoid extra state.
   // useMemo prevents unnecessary recalculation.
-  const products = useMemo(
-    () => dummyProducts.filter((product) => product.stock > 0),
-    [],
-  );
+
 
   // Custom hook handles pagination logic.
   // Component only consumes final results.
@@ -42,11 +50,36 @@ function FlashDeals() {
   // Simulate loading behavior.
   // Later replace with real API fetching.
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
+    // Load latest products from backend and extract active flash deals.
+    const loadDeals = async () => {
+      try {
+        setLoading(true);
 
-    return () => clearTimeout(timer);
+        // Fetch product catalog from API.
+        const response = await fetch("/api/products");
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error("Failed to load deals");
+        }
+
+        // Only show discounted products that are still available.
+        const flashDeals = data.products.filter(
+          (product: Product) => product.discount > 0 && product.stock > 0,
+        );
+
+        setProducts(flashDeals);
+      } catch (error) {
+        console.error(error);
+
+        setError("Failed to load deals");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDeals();
   }, []);
 
   // Update page in URL.
@@ -80,7 +113,11 @@ function FlashDeals() {
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8  py-8">
-        {loading ? (
+        {error ? (
+          <div className="text-center py-16">
+            <p className="text-red-500">{error}</p>
+          </div>
+        ) : loading ? (
           <Loader />
         ) : products.length === 0 ? (
           <div className="text-center py-16">

@@ -1,7 +1,14 @@
+// Product Page Flow:
+//
+// Product ID From URL
+// → Fetch Product
+// → Fetch Related Products
+// → Sync Cart State
+// → Render Product Details
+
 "use client";
 
 import { useCart } from "@/context/cart/useCart";
-import { dummyProducts } from "@/public/assets";
 import DummyReviewsSection from "@/components/ui/DummyReviewsSection";
 import type { Product } from "@/types";
 import { CURRENCY } from "@/utils/config";
@@ -10,7 +17,6 @@ import {
   ArrowRightIcon,
   HomeIcon,
   LeafIcon,
-  Loader,
   MinusIcon,
   PlusIcon,
   ShoppingCartIcon,
@@ -19,8 +25,9 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ProductCard from "@/components/product/ProductCard";
+import Loader from "@/components/ui/Loader";
 
 function Product() {
   const router = useRouter();
@@ -35,18 +42,65 @@ function Product() {
 
   // Match URL id with product id.
   // Example: /products/123 → find product with _id=123
-  const product = dummyProducts.find((p) => p._id === id) || null;
+  const [product, setProduct] = useState<Product | null>(null);
 
   // Show products from same category, but avoid showing current product again.
-  const relatedProducts = product
-    ? dummyProducts.filter(
-        (p) => p._id !== id && p.category === product.category,
-      )
-    : [];
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Load product details and related products.
+    async function loadProduct() {
+      try {
+        // Fetch selected product from backend.
+        const response = await fetch(`/api/products/${id}`);
+
+        const data = await response.json();
+
+        if (response.ok) {
+          const currentProduct = data.product;
+
+          setProduct(currentProduct);
+
+          // Load product catalog to find related products.
+          const productsResponse = await fetch("/api/products");
+
+          const productsData = await productsResponse.json();
+
+          if (productsResponse.ok) {
+            // Show products from the same category except the current one.
+            const related = productsData.products.filter(
+              (p: Product) =>
+                p.category === currentProduct.category &&
+                p._id !== currentProduct._id,
+            );
+
+            setRelatedProducts(related);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // Wait until route parameter becomes available.
+    if (id) {
+      loadProduct();
+    }
+  }, [id]);
 
   // Safety check.
   // Prevent page crash if product id is missing or invalid.
-  if (!product) return <Loader />;
+  if (loading) {
+    return <Loader />;
+  }
+
+  if (!product) {
+    return <Loader />;
+  }
 
   // Check if this product already exists inside cart
   const cartItem = items.find((item) => item.product._id === product._id);
