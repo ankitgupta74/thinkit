@@ -3146,3 +3146,82 @@ App Startup
 - API-driven UI Rendering
 - Cart State Synchronization
 - Query Parameter State Management
+
+implement dynamic product catalog and checkout data integration
+
+- configure external image domains for GitHub and Cloudinary in Next.js
+- create reusable product data hook for filtering, sorting and pagination
+- connect product catalog pages with backend product APIs
+- implement URL-driven product filtering and pagination workflow
+- integrate dynamic product search using live catalog data
+- connect flash deals page with discounted inventory data
+- implement dynamic product details and related products loading
+- integrate checkout address selection using authenticated user addresses
+- connect order review step with live cart, address and pricing data
+
+### Progress
+
+- product catalog fully connected with backend product APIs
+- product filtering, sorting and pagination centralized in custom hook
+- search and flash deals pages use live product inventory
+- product details page loads dynamic product and related catalog data
+- checkout address step uses authenticated customer addresses
+- order review step displays live cart and delivery information
+- external image hosting support configured for production assets
+
+### Product Catalog Flow
+
+- Customer Opens Catalog
+- Fetch Products API
+- Apply Filters
+- Apply Sorting
+- Apply Pagination
+- Render Products
+
+### Product Details Flow
+
+- Read Product ID
+- Fetch Product Data
+- Fetch Related Products
+- Sync Cart State
+- Render Product Page
+
+### Checkout Flow
+
+- Load User Addresses
+- Select Delivery Address
+- Review Cart Items
+- Confirm Order Details
+- Submit Order
+
+### Concept
+
+- API-driven storefront
+- reusable data transformation hooks
+- URL-based state management
+- dynamic product rendering
+- authenticated checkout workflow
+- centralized product data processing
+
+### Approach
+
+- use backend APIs as the source of product data
+- centralize filtering and pagination logic inside custom hooks
+- keep product filters synchronized with URL parameters
+- reuse shared product endpoints across customer pages
+- separate data processing from UI rendering
+- use authenticated user data during checkout
+
+### Techniques Used
+
+- Custom React Hooks
+- API Integration
+- URL Search Parameters
+- Client-side Filtering
+- Client-side Sorting
+- Pagination Logic
+- Dynamic Routing
+- Related Product Matching
+- Authenticated User Data Access
+- Checkout State Management
+- External Image Configuration

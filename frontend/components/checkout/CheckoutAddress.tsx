@@ -1,20 +1,34 @@
-import { ChevronRightIcon, MapPinIcon, PlusIcon } from "lucide-react";
+// Checkout Flow:
+//
+// Select Address
+// → Save Selected Address
+// → Continue To Payment
+
+import {
+  ChevronRightIcon,
+  MapPinIcon,
+  PlusIcon
+} from "lucide-react";
 import Link from "next/link";
 import type { Address } from "@/types";
-import type { Dispatch, SetStateAction } from "react";
+import type {
+  Dispatch,
+  SetStateAction
+} from "react";
 
 interface CheckoutAddressProps {
   user: {
     addresses: Address[];
   };
 
-  address: Address;
+  address: Address | null;
 
-  setAddress: Dispatch<SetStateAction<Address>>;
+  setAddress: Dispatch<SetStateAction<Address | null>>;
 
   setStep: Dispatch<SetStateAction<string>>;
 }
 
+// Customer chooses delivery destination.
 function CheckoutAddress({
   user,
   address,
@@ -32,9 +46,11 @@ function CheckoutAddress({
             Saved Addresses
           </h3>
           <div className="grid sm:grid-cols-2 gap-3">
+            {/* Render saved addresses fetched for the logged-in user */}
             {user.addresses.map((addr: Address) => (
               <div
                 key={addr._id || addr.label}
+                // Selected address becomes the active checkout address.
                 onClick={() =>
                   setAddress({
                     _id: addr._id,
@@ -48,7 +64,7 @@ function CheckoutAddress({
                     lng: addr.lng,
                   })
                 }
-                className={`p-4 rounded-xl border cursor-pointer transition-colors ${address.label === addr.label && address.address === addr.address ? "border-app-green bg-app-cream" : "border-app-border hover:bg-app-cream"}`}
+                className={`p-4 rounded-xl border cursor-pointer transition-colors ${address?._id === addr._id ? "border-app-green bg-app-cream" : "border-app-border hover:bg-app-cream"}`}
               >
                 <div className="flex items-center gap-2 mb-1">
                   <MapPinIcon className="size-4 text-app-green" />
@@ -70,6 +86,7 @@ function CheckoutAddress({
           </div>
         </div>
       )}
+      {/* Navigate to address management page */}
       <Link
         href="/addresses"
         className="mt-6 px-6 py-3 border border-gray-600 text-gray-600 rounded-xl flex-center gap-2"
@@ -82,7 +99,7 @@ function CheckoutAddress({
           setStep("payment");
           scrollTo(0, 0);
         }}
-        disabled={!address.address || !address.city}
+        disabled={!address?.address || !address?.city}
         className="mt-6 px-6 py-3 bg-app-green text-white font-semibold rounded-xl hover:bg-app-green-light transition-colors disabled:opacity-50 flex items-center gap-2"
       >
         Continue to Payment <ChevronRightIcon className="size-4" />

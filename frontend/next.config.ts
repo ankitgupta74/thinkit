@@ -1,11 +1,18 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Allow Next/Image to load images from trusted external sources.
   images: {
     remotePatterns: [
+      // Product/demo images stored on GitHub.
       {
         protocol: "https",
         hostname: "raw.githubusercontent.com",
+      },
+      // Uploaded product images served from Cloudinary.
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
       },
     ],
   },
