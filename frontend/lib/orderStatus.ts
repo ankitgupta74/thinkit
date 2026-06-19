@@ -22,3 +22,9 @@ export const ORDER_STATUSES = [
   // Order was cancelled before completion.
   "Cancelled",
 ] as const;
+
+export const ACTIVE_DELIVERY_STATUSES = [
+  "Assigned",
+  "Packed",
+  "Out for Delivery",
+];

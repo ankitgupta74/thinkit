@@ -14,6 +14,7 @@ import type { DeliveryPartner, Order } from "@/types";
 import Loader from "@/components/ui/Loader";
 import { CURRENCY } from "@/utils/config";
 import { ORDER_STATUSES } from "@/lib/orderStatus";
+import { statusColors } from "@/public/assets";
 
 export default function AdminOrders() {
   // Stores all customer orders
@@ -48,9 +49,7 @@ export default function AdminOrders() {
         }
 
         if (partnersData.success) {
-          setPartners(
-            partnersData.partners.filter((p: DeliveryPartner) => p.isActive),
-          );
+          setPartners(partnersData.partners);
         }
       } catch (error) {
         console.error(error);
@@ -134,17 +133,6 @@ export default function AdminOrders() {
 
       toast.error("Assignment failed");
     }
-  };
-
-  // Maps each status to its badge color
-  const statusColors: Record<string, string> = {
-    Placed: "bg-blue-100 text-blue-800",
-    Confirmed: "bg-amber-100 text-amber-800",
-    Assigned: "bg-indigo-100 text-indigo-800",
-    Packed: "bg-cyan-100 text-cyan-800",
-    "Out for Delivery": "bg-purple-100 text-purple-800",
-    Delivered: "bg-green-100 text-green-800",
-    Cancelled: "bg-red-100 text-red-800",
   };
 
   // Show loader until all required data is ready
@@ -300,36 +288,66 @@ export default function AdminOrders() {
               ) : (
                 <div className="space-y-2 mb-5 max-h-60 overflow-y-auto">
                   {/* Render all available partners as selectable options */}
-                  {partners.map((p) => (
-                    <label
-                      key={p._id}
-                      className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${selectedPartner === p._id ? "border-app-green bg-app-green/5" : "border-app-border hover:bg-app-cream"}`}
-                    >
-                      <input
-                        type="radio"
-                        // Only one delivery partner can be selected
-                        name="partner"
-                        value={p._id}
-                        // Highlight the currently selected partner
-                        checked={selectedPartner === p._id}
-                        onChange={() => setSelectedPartner(p._id)}
-                        className="text-app-green"
-                      />
-                      <div className="size-8 rounded-full bg-app-green flex-center">
-                        <span className="text-white text-xs font-semibold">
-                          {p.name.charAt(0)}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-zinc-900">
-                          {p.name}
-                        </p>
-                        <p className="text-xs text-zinc-500 capitalize">
-                          {p.vehicleType} • {p.phone}
-                        </p>
-                      </div>
-                    </label>
-                  ))}
+                  {partners.map((p) => {
+                    const isUnavailable = !p.isActive || p.isBusy;
+
+                    return (
+                      <label
+                        key={p._id}
+                        className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${selectedPartner === p._id ? "border-app-green bg-app-green/5" : "border-app-border"} ${
+                          isUnavailable
+                            ? "opacity-60 cursor-not-allowed"
+                            : "cursor-pointer hover:bg-app-cream"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          disabled={isUnavailable}
+                          // Only one delivery partner can be selected
+                          name="partner"
+                          value={p._id}
+                          // Highlight the currently selected partner
+                          checked={selectedPartner === p._id}
+                          onChange={() => {
+                            if (isUnavailable) return;
+
+                            setSelectedPartner(p._id);
+                          }}
+                          className="text-app-green"
+                        />
+                        <div className="size-8 rounded-full bg-app-green flex-center">
+                          <span className="text-white text-xs font-semibold">
+                            {p.name.charAt(0)}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-zinc-900">
+                            {p.name}
+                          </p>
+                          <p className="text-xs text-zinc-500 capitalize">
+                            {p.vehicleType} • {p.phone}
+                          </p>
+                        </div>
+                        <div className="flex gap-2 mt-1">
+                          {!p.isBusy && p.isActive && (
+                            <span className="text-[10px] px-2 py-1 rounded-full bg-green-100 text-green-700">
+                              Available
+                            </span>
+                          )}
+                          {p.isBusy && (
+                            <span className="text-[10px] px-2 py-1 rounded-full bg-orange-100 text-orange-700">
+                              Busy
+                            </span>
+                          )}
+                          {!p.isActive && (
+                            <span className="text-[10px] px-2 py-1 rounded-full bg-red-100 text-red-700">
+                              Inactive
+                            </span>
+                          )}
+                        </div>
+                      </label>
+                    );
+                  })}
                 </div>
               )}
               <div className="flex gap-2">

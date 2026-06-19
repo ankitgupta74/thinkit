@@ -62,9 +62,14 @@ export async function GET() {
         path: "user",
         select: "name email",
       })
+      .populate({
+        path: "deliveryPartner",
+        select: "name phone",
+      })
       .sort({
         createdAt: -1,
       })
+      .limit(8)
       // Convert documents into plain objects for faster reads.
       .lean();
 

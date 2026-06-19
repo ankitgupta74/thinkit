@@ -13,6 +13,9 @@ export interface DeliveryPartner {
 
   isActive: boolean;
 
+  isBusy?: boolean;
+  activeOrderId?: string | null;
+
   createdAt?: string;
   updatedAt?: string;
 

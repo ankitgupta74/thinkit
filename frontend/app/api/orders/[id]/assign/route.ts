@@ -13,6 +13,7 @@ import { getAdminUser } from "@/lib/admin";
 
 import Order from "@/models/Order";
 import DeliveryPartner from "@/models/DeliveryPartner";
+import { ACTIVE_DELIVERY_STATUSES } from "@/lib/orderStatus";
 
 // Allows admins to assign a rider to a specific order.
 export async function PUT(
@@ -69,6 +70,25 @@ export async function PUT(
       );
     }
 
+    const activeOrder = await Order.findOne({
+      deliveryPartner: partnerId,
+      status: {
+        $in: ACTIVE_DELIVERY_STATUSES,
+      },
+    });
+
+    if (activeOrder) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Delivery partner already assigned to another order",
+        },
+        {
+          status: 400,
+        },
+      );
+    }
+
     // Find the order that needs rider assignment.
     const order = await Order.findById(id);
 
@@ -80,6 +100,18 @@ export async function PUT(
         },
         {
           status: 404,
+        },
+      );
+    }
+
+    if (order.deliveryPartner) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Delivery partner already assigned",
+        },
+        {
+          status: 400,
         },
       );
     }

@@ -8,8 +8,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PlusIcon, XIcon, TruckIcon, PhoneIcon, MailIcon } from "lucide-react";
-import { DeliveryPartner } from "@/types";
+import {
+  PlusIcon,
+  XIcon,
+  TruckIcon,
+  PhoneIcon,
+  MailIcon
+} from "lucide-react";
+import { DeliveryPartner, VehicleType } from "@/types";
 import Loader from "@/components/ui/Loader";
 
 export default function AdminDeliveryPartners() {
@@ -22,6 +28,12 @@ export default function AdminDeliveryPartners() {
   // Controls opening and closing of the partner form modal
   const [showForm, setShowForm] = useState(false);
 
+  const [showEditForm, setShowEditForm] = useState(false);
+
+  const [editingPartner, setEditingPartner] = useState<DeliveryPartner | null>(
+    null,
+  );
+
   // Prevents multiple form submissions while saving
   const [saving, setSaving] = useState(false);
 
@@ -32,8 +44,30 @@ export default function AdminDeliveryPartners() {
     email: "",
     password: "",
     phone: "",
-    vehicleType: "bike",
+    vehicleType: "bike" as VehicleType,
   });
+
+  const [editForm, setEditForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    phone: "",
+    vehicleType: "bike" as VehicleType,
+  });
+
+  const openEditModal = (partner: DeliveryPartner) => {
+    setEditingPartner(partner);
+
+    setEditForm({
+      name: partner.name,
+      email: partner.email,
+      password: "******",
+      phone: partner.phone,
+      vehicleType: partner.vehicleType ?? "bike",
+    });
+
+    setShowEditForm(true);
+  };
 
   useEffect(() => {
     // Load all delivery partners from backend.
@@ -84,10 +118,55 @@ export default function AdminDeliveryPartners() {
           email: "",
           password: "",
           phone: "",
-          vehicleType: "bike",
+          vehicleType: "bike" as VehicleType,
         });
 
         setShowForm(false);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updatePartner = async (e: React.SubmitEvent) => {
+    e.preventDefault();
+
+    if (!editingPartner) return;
+
+    try {
+      setSaving(true);
+
+      const response = await fetch(
+        `/api/deliveryPartners/${editingPartner._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(editForm),
+        },
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        setPartners((prev) =>
+          prev.map((partner) =>
+            partner._id === editingPartner._id ? data.partner : partner,
+          ),
+        );
+
+        setShowEditForm(false);
+        setEditingPartner(null);
+        setEditForm({
+          name: "",
+          email: "",
+          password: "",
+          phone: "",
+          vehicleType: "bike",
+        });
       }
     } catch (error) {
       console.error(error);
@@ -188,11 +267,19 @@ export default function AdminDeliveryPartners() {
                   </div>
                 </div>
                 {/* Badge color changes based on active status */}
-                <span
-                  className={`px-2.5 py-1 text-[10px] font-semibold rounded-full ${p.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
-                >
-                  {p.isActive ? "Active" : "Inactive"}
-                </span>
+                <div className="flex flex-col items-end gap-2">
+                  <span
+                    className={`px-2.5 py-1 text-[10px] font-semibold rounded-full ${
+                      !p.isActive
+                        ? "bg-red-100 text-red-700"
+                        : p.isBusy
+                          ? "bg-orange-100 text-orange-700"
+                          : "bg-green-100 text-green-700"
+                    }`}
+                  >
+                    {!p.isActive ? "Inactive" : p.isBusy ? "Busy" : "Available"}
+                  </span>
+                </div>
               </div>
               <div className="space-y-1.5 text-sm text-zinc-600">
                 <p className="flex items-center gap-2">
@@ -201,14 +288,38 @@ export default function AdminDeliveryPartners() {
                 <p className="flex items-center gap-2">
                   <PhoneIcon className="w-3.5 h-3.5 text-zinc-400" /> {p.phone}
                 </p>
+                {p.isBusy && (
+                  <p className="text-xs text-orange-600 font-medium">
+                    Assigned to active order
+                  </p>
+                )}
               </div>
               <button
                 type="button"
+                disabled={p.isBusy}
                 // Pass current status so it can be switched to the opposite state later
                 onClick={() => toggleActive(p._id, p.isActive ?? false)}
-                className={`w-full py-2 text-xs font-medium rounded-lg transition-colors ${p.isActive ? "bg-red-50 text-red-600 hover:bg-red-100" : "bg-green-50 text-green-600 hover:bg-green-100"}`}
+                className={`w-full py-2 text-xs font-medium rounded-lg transition-colors ${
+                  p.isBusy
+                    ? "bg-zinc-100 text-zinc-400 cursor-not-allowed"
+                    : p.isActive
+                      ? "bg-red-50 text-red-600 hover:bg-red-100"
+                      : "bg-green-50 text-green-600 hover:bg-green-100"
+                }`}
               >
                 {p.isActive ? "Deactivate" : "Activate"}
+              </button>
+              <button
+                type="button"
+                disabled={p.isBusy}
+                onClick={() => openEditModal(p)}
+                className={`w-full mt-2 py-2 text-xs font-medium rounded-lg border border-app-border transition-colors ${
+                  p.isBusy
+                    ? "bg-zinc-100 text-zinc-400 cursor-not-allowed"
+                    : "bg-white text-app-green hover:bg-app-cream"
+                }`}
+              >
+                Edit Profile
               </button>
             </div>
           ))}
@@ -222,12 +333,17 @@ export default function AdminDeliveryPartners() {
           <div
             // Clicking outside closes the modal
             className="fixed inset-0 bg-app-cream/80 backdrop-blur z-50"
-            onClick={() => setShowForm(false)}
           />
-          <div className="fixed inset-0 z-50 flex-center p-4">
+          <div
+            className="fixed inset-0 z-50 flex-center p-4"
+            onClick={() => {
+              setShowForm(false);
+            }}
+          >
             <form
               // Handles creation of a new delivery partner
               onSubmit={handleSubmit}
+              onClick={(e) => e.stopPropagation()}
               className="bg-white rounded-2xl p-6 w-full max-w-lg animate-fade-in"
             >
               <div className="flex items-center justify-between mb-5">
@@ -333,7 +449,10 @@ export default function AdminDeliveryPartners() {
                       id="vehicleType"
                       value={form.vehicleType}
                       onChange={(e) =>
-                        setForm({ ...form, vehicleType: e.target.value })
+                        setForm({
+                          ...form,
+                          vehicleType: e.target.value as VehicleType,
+                        })
                       }
                       className="w-full px-4 py-2.5 text-sm rounded-xl border border-app-border focus:border-app-green outline-none bg-white"
                     >
@@ -355,6 +474,175 @@ export default function AdminDeliveryPartners() {
                     ? "Creating..." // Show progress while saving
                     : "Create Partner" // Default button text
                 }
+              </button>
+            </form>
+          </div>
+        </>
+      )}
+      {showEditForm && editingPartner && (
+        <>
+          <div
+            // Clicking outside closes the modal
+            className="fixed inset-0 bg-app-cream/80 backdrop-blur z-50"
+          />
+          <div
+            className="fixed inset-0 z-50 flex-center p-4"
+            onClick={() => {
+              setShowEditForm(false);
+              setEditingPartner(null);
+
+              setEditForm({
+                name: "",
+                email: "",
+                password: "",
+                phone: "",
+                vehicleType: "bike",
+              });
+            }}
+          >
+            <form
+              // Handles creation of a new delivery partner
+              onSubmit={updatePartner}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl p-6 w-full max-w-lg animate-fade-in"
+            >
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-lg font-semibold text-app-green">
+                  Edit Delivery Partner
+                </h2>
+                <button
+                  type="button"
+                  aria-label="Close modal"
+                  // Close modal without saving
+                  title="Close Edit Profile Form"
+                  onClick={() => {
+                    setShowEditForm(false);
+                    setEditingPartner(null);
+
+                    setEditForm({
+                      name: "",
+                      email: "",
+                      password: "",
+                      phone: "",
+                      vehicleType: "bike",
+                    });
+                  }}
+                  className="p-2 hover:bg-app-cream rounded-lg"
+                >
+                  <XIcon className="size-5" />
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="edit-name"
+                    className="block text-sm font-medium text-app-green mb-1.5"
+                  >
+                    Full Name
+                  </label>
+                  <input
+                    id="edit-name"
+                    type="text"
+                    required
+                    // Controlled input: value comes from state and updates state on change
+                    value={editForm.name}
+                    // Copy existing form values and update only the changed field
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        name: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2.5 text-sm rounded-xl border border-app-border focus:border-app-green outline-none"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label
+                      htmlFor="edit-email"
+                      className="block text-sm font-medium text-app-green mb-1.5"
+                    >
+                      Email
+                    </label>
+                    <input
+                      id="edit-email"
+                      type="email"
+                      disabled
+                      value={editForm.email}
+                      className="w-full px-4 py-2.5 text-sm rounded-xl border border-app-border bg-zinc-100 text-zinc-500 cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="edit-password"
+                      className="block text-sm font-medium text-app-green mb-1.5"
+                    >
+                      Password
+                    </label>
+                    <input
+                      id="edit-password"
+                      type="password"
+                      disabled
+                      value={editForm.password}
+                      className="w-full px-4 py-2.5 text-sm rounded-xl border border-app-border bg-zinc-100 text-zinc-500 cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label
+                      htmlFor="edit-phone"
+                      className="block text-sm font-medium text-app-green mb-1.5"
+                    >
+                      Phone
+                    </label>
+                    <input
+                      id="edit-phone"
+                      type="text"
+                      required
+                      value={editForm.phone}
+                      onChange={(e) =>
+                        setEditForm({
+                          ...editForm,
+                          phone: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-2.5 text-sm rounded-xl border border-app-border focus:border-app-green outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="edit-vehicleType"
+                      className="block text-sm font-medium text-app-green mb-1.5"
+                    >
+                      Vehicle Type
+                    </label>
+                    <select
+                      // Dropdown for selecting delivery vehicle type
+                      id="edit-vehicleType"
+                      value={editForm.vehicleType}
+                      onChange={(e) =>
+                        setEditForm({
+                          ...editForm,
+                          vehicleType: e.target.value as VehicleType,
+                        })
+                      }
+                      className="w-full px-4 py-2.5 text-sm rounded-xl border border-app-border focus:border-app-green outline-none bg-white"
+                    >
+                      <option value="bike">Bike</option>
+                      <option value="scooter">Scooter</option>
+                      <option value="car">Car</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <button
+                type="submit"
+                // Disable button while create request is running
+                disabled={saving}
+                className="mt-6 w-full py-3 bg-app-green text-white font-semibold rounded-xl hover:bg-app-green-light transition-colors disabled:opacity-60"
+              >
+                {saving ? "Updating..." : "Update Partner"}
               </button>
             </form>
           </div>

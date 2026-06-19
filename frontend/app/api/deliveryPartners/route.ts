@@ -8,6 +8,8 @@ import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongodb";
 import { getAdminUser } from "@/lib/admin";
 import DeliveryPartner from "@/models/DeliveryPartner";
+import Order from "@/models/Order";
+import { ACTIVE_DELIVERY_STATUSES } from "@/lib/orderStatus";
 
 // Returns all delivery partners for admin management.
 export async function GET() {
@@ -32,9 +34,29 @@ export async function GET() {
     // Show newest delivery partners first.
     const partners = await DeliveryPartner.find().sort({ createdAt: -1 });
 
+    const partnersWithStatus = await Promise.all(
+      partners.map(async (partner) => {
+        const activeOrder = await Order.findOne({
+          deliveryPartner: partner._id,
+          status: {
+            $in: ACTIVE_DELIVERY_STATUSES,
+          },
+        });
+
+        const partnerData = partner.toObject();
+        delete partnerData.password;
+
+        return {
+          ...partnerData,
+          isBusy: Boolean(activeOrder),
+          activeOrderId: activeOrder?._id ?? null,
+        };
+      }),
+    );
+
     return NextResponse.json({
       success: true,
-      partners,
+      partners: partnersWithStatus,
     });
   } catch (error) {
     console.error(error);

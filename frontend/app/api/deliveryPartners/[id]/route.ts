@@ -36,10 +36,28 @@ export async function PUT(
     const { id } = await context.params;
 
     // Updated information submitted by the admin.
-    const body = await request.json();
+    const { name, phone, vehicleType, isActive } = await request.json();
+
+    const updateData: Record<string, unknown> = {};
+
+    if (name !== undefined) {
+      updateData.name = name;
+    }
+
+    if (phone !== undefined) {
+      updateData.phone = phone;
+    }
+
+    if (vehicleType !== undefined) {
+      updateData.vehicleType = vehicleType;
+    }
+
+    if (isActive !== undefined) {
+      updateData.isActive = isActive;
+    }
 
     // Save the updated delivery partner details.
-    const partner = await DeliveryPartner.findByIdAndUpdate(id, body, {
+    const partner = await DeliveryPartner.findByIdAndUpdate(id, updateData, {
       returnDocument: "after",
     });
 
