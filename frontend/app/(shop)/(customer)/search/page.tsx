@@ -1,15 +1,20 @@
 "use client";
 
 import ProductCard from "@/components/product/ProductCard";
+import Loader from "@/components/ui/Loader";
 import { api } from "@/lib/api";
 import type { Product } from "@/types";
 import { Home, SearchIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import {
+  Suspense,
+  useEffect,
+  useState
+} from "react";
 import toast from "react-hot-toast";
 
-function Search() {
+function SearchContent() {
   const searchParams = useSearchParams();
 
   // Search term comes from the URL so results can be shared and bookmarked.
@@ -121,6 +126,14 @@ function Search() {
         )}
       </div>
     </div>
+  );
+}
+
+function Search() {
+  return (
+    <Suspense fallback={<Loader />}>
+      <SearchContent />
+    </Suspense>
   );
 }
 

@@ -29,12 +29,16 @@ import {
   useRouter, // navigate/update URL
   usePathname, // get current route
 } from "next/navigation";
-import { useMemo, useState } from "react";
+import {
+  Suspense,
+  useMemo,
+  useState
+} from "react";
 
 // Page responsibility:
 // Read URL state → coordinate hooks → render UI.
 // Heavy business logic stays outside in hooks/helpers.
-function Products() {
+function ProductsContent() {
   // Reads URL values like ?category=fruits
   // URL acts as global state.
   // Filters become shareable, bookmarkable and persistent.
@@ -290,6 +294,14 @@ function Products() {
         </>
       )}
     </div>
+  );
+}
+
+function Products() {
+  return (
+    <Suspense fallback={<Loader />}>
+      <ProductsContent />
+    </Suspense>
   );
 }
 

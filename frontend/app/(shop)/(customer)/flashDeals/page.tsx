@@ -7,6 +7,7 @@ import usePagination from "@/hooks/usePagination";
 import { Product } from "@/types";
 import { Zap } from "lucide-react";
 import {
+  Suspense,
   useEffect,
   useState
 } from "react";
@@ -18,7 +19,7 @@ import {
 import { api } from "@/lib/api";
 import toast from "react-hot-toast";
 
-function FlashDeals() {
+function FlashDealsContent() {
   // URL can store page/filter info.
   // Makes state shareable and refresh-safe.
   const searchParams = useSearchParams();
@@ -151,6 +152,14 @@ function FlashDeals() {
         )}
       </div>
     </div>
+  );
+}
+
+function FlashDeals() {
+  return (
+    <Suspense fallback={<Loader />}>
+      <FlashDealsContent />
+    </Suspense>
   );
 }
 
