@@ -191,6 +191,20 @@ const orderSchema = new Schema(
       type: Boolean,
       default: false,
     },
+
+    // Stripe Checkout Session created for card-payment orders.
+    stripeCheckoutSessionId: {
+      type: String,
+      default: "",
+      index: true,
+    },
+
+    // Stripe Payment Intent created after Checkout payment succeeds.
+    stripePaymentIntentId: {
+      type: String,
+      default: "",
+      index: true,
+    },
   },
   {
     // Automatically creates createdAt and updatedAt fields.

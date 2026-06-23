@@ -16,6 +16,12 @@ export const ORDER_STATUSES = [
   // Order is currently on the way to the customer.
   "Out for Delivery",
 
+  "Payment Pending",
+
+  "Payment Succeeded",
+
+  "Payment Failed",
+
   // Customer successfully received the order.
   "Delivered",
 

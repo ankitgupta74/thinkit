@@ -1,5 +1,6 @@
 import { Address } from "./address";
 import { DeliveryPartner } from "./delivery";
+import { ORDER_STATUSES } from "@/lib/orderStatus";
 
 export interface OrderItem {
   _id: string;
@@ -25,7 +26,7 @@ export interface OrderUser {
 export interface StatusHistory {
   _id: string;
 
-  status: string;
+  status: (typeof ORDER_STATUSES)[number];
   timestamp: string;
   note: string;
 }
@@ -57,7 +58,7 @@ export interface Order {
 
   total: number;
 
-  status: string;
+  status: (typeof ORDER_STATUSES)[number];
 
   statusHistory: StatusHistory[];
 
@@ -66,6 +67,10 @@ export interface Order {
   deliveryOtp: string;
 
   isPaid: boolean;
+
+  stripeCheckoutSessionId?: string;
+
+  stripePaymentIntentId?: string;
 
   createdAt: string;
 

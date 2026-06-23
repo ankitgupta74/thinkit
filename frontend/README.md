@@ -3776,3 +3776,164 @@ app/delivery/
 lib/
 └── deliveryAuth.ts
 ```
+
+## Stripe Card and COD Payment Workflow
+
+Implemented separate and secure checkout flows for Cash on Delivery and Stripe card payments. Orders now use server-side product validation, trusted price calculation, stock verification, Stripe Checkout Sessions, webhook payment confirmation, failed payment handling, and post-payment delivery automation.
+
+### Steps Taken
+
+1. Added authenticated order history API so customers can fetch only their own orders.
+2. Added server-side checkout validation for payment method, cart items, product availability, and stock quantity.
+3. Fetched product details from MongoDB instead of trusting frontend product names, prices, or totals.
+4. Stored product snapshots inside orders so previous order data remains unchanged if products are edited later.
+5. Calculated subtotal, delivery fee, tax, and final total on the server.
+6. Added separate COD and card payment paths during order creation.
+7. Created COD orders with `Placed` status and immediate stock reduction.
+8. Triggered stock update and rider assignment workflows after successful COD order creation.
+9. Created card orders with `Payment Pending` status before opening Stripe Checkout.
+10. Created Stripe Checkout Sessions with trusted server-calculated order totals.
+11. Added Stripe Checkout success and cancel redirect URLs.
+12. Stored MongoDB order ID inside Stripe metadata for webhook order matching.
+13. Stored Stripe Checkout Session ID in the order record.
+14. Set card Checkout Session expiry to 30 minutes.
+15. Added Stripe webhook signature verification using the raw request body.
+16. Added successful payment handling for `checkout.session.completed`.
+17. Marked successful card orders as paid and changed their status from `Payment Pending` to `Placed`.
+18. Stored Stripe Payment Intent ID in the order for payment tracking.
+19. Reduced stock only after Stripe confirms successful card payment.
+20. Triggered low-stock and rider assignment workflows after confirmed card payment.
+21. Added expired Checkout Session handling using `checkout.session.expired`.
+22. Added failed card payment handling using `checkout.session.async_payment_failed`.
+23. Updated expired sessions to `Cancelled` and failed payments to `Payment Failed`.
+24. Prevented duplicate webhook events from reducing stock or assigning riders more than once.
+
+### Progress
+
+- Customer order history API completed.
+- Secure server-side order validation completed.
+- Trusted product snapshot creation completed.
+- Server-side total calculation completed.
+- COD checkout workflow completed.
+- Stripe card checkout workflow completed.
+- Stripe Checkout Session creation completed.
+- Stripe session expiry handling completed.
+- Stripe webhook verification completed.
+- Card payment confirmation completed.
+- Card payment failure handling completed.
+- Card checkout cancellation handling completed.
+- Inventory reduction after successful payment completed.
+- Low-stock workflow integration completed.
+- Rider assignment workflow integration completed.
+- Duplicate webhook protection completed.
+
+### Payment Workflow
+
+#### Cash On Delivery
+
+```text
+Customer Checkout
+→ Verify User
+→ Validate Products And Stock
+→ Calculate Trusted Total
+→ Create Order With Placed Status
+→ Reduce Inventory
+→ Trigger Stock Update Event
+→ Trigger Rider Assignment Event
+→ Return Completed Order
+```
+
+#### Stripe Card Payment
+
+```text
+Customer Checkout
+→ Verify User
+→ Validate Products And Stock
+→ Calculate Trusted Total
+→ Create Order With Payment Pending Status
+→ Create Stripe Checkout Session
+→ Store Stripe Session ID
+→ Redirect Customer To Stripe Checkout
+→ Stripe Webhook Confirms Payment
+→ Mark Order As Paid
+→ Change Status To Placed
+→ Reduce Inventory
+→ Trigger Stock Update Event
+→ Trigger Rider Assignment Event
+```
+
+#### Stripe Expired Or Failed Payment
+
+```text
+Customer Does Not Complete Stripe Checkout
+→ Stripe Sends Expired Or Failed Webhook
+→ Find Pending Card Order Using Metadata
+→ Update Order Status
+→ Add Payment Failure History
+→ Do Not Reduce Inventory
+→ Do Not Assign Rider
+```
+
+### Concepts Covered
+
+- Cash on Delivery
+- Stripe Checkout
+- Stripe Webhooks
+- Payment Pending Orders
+- Payment Confirmation
+- Payment Failure Handling
+- Checkout Session Expiry
+- Server-Side Price Calculation
+- Product Snapshot Storage
+- Inventory Validation
+- Stock Reduction
+- Payment Intent Tracking
+- Webhook Signature Verification
+- Idempotent Webhook Handling
+- Order Status History
+- Background Workflow Events
+
+### Approach
+
+- Keep all order calculations on the server.
+- Use MongoDB product data instead of frontend price values.
+- Create an order before starting the card payment process.
+- Keep card orders pending until Stripe confirms payment through the webhook.
+- Reduce stock immediately for COD orders.
+- Reduce stock only after confirmed Stripe payment for card orders.
+- Store Stripe session and payment references inside the order.
+- Use Stripe metadata to connect payment sessions with MongoDB orders.
+- Keep expired and failed payment orders visible in order history.
+- Prevent duplicate webhook events from repeating stock reduction or rider assignment.
+- Trigger the same delivery workflow after successful COD and card payments.
+
+### Techniques Used
+
+- Next.js Route Handlers
+- Stripe Checkout Sessions
+- Stripe Webhook Signature Verification
+- Raw Request Body Handling
+- Stripe Metadata
+- Stripe Payment Intent Storage
+- Mongoose Product Queries
+- Mongoose Order Creation
+- Mongoose Atomic Stock Updates
+- Server-Side Tax Calculation
+- Product Snapshot Mapping
+- Order Status History
+- JWT User Authentication
+- HTTP-only Cookie Authentication
+- Inngest Event Triggers
+- Duplicate Webhook Protection
+- Conditional Database Queries
+
+### Files Integrated
+
+```text
+app/api/
+├── orders/
+│   └── route.ts
+└── stripe/
+    └── webhook/
+        └── route.ts
+```

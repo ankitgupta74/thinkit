@@ -18,7 +18,7 @@ import "@/models/DeliveryPartner";
 import { getAdminUser } from "@/lib/admin";
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
@@ -85,7 +85,7 @@ export async function GET(
 }
 
 export async function PATCH(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
@@ -197,6 +197,7 @@ export async function PATCH(
 }
 
 export async function DELETE(
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
@@ -222,7 +223,16 @@ export async function DELETE(
     const { id } = await params;
 
     // Remove the order permanently from the database
-    const deletedOrder = await Order.findByIdAndDelete(id);
+    const deletedOrder = await Order.findByIdAndUpdate(
+      id,
+      {
+        status: "Cancelled",
+        cancelledAt: new Date(),
+      },
+      {
+        returnDocument: "after",
+      },
+    );
 
     // Nothing to delete if the order does not exist
     if (!deletedOrder) {

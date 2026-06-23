@@ -12,7 +12,7 @@ import { serverError } from "@/lib/apiError";
 
 // Returns live delivery tracking information for a specific customer order.
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
