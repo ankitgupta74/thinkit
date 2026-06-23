@@ -1,6 +1,6 @@
 "use client";
 
-/* ===========================
+/* 
   Authentication Page
   Handles:
   - Login mode
@@ -8,7 +8,7 @@
   - Form state
   - Loading state
   - Future API integration
-=========================== */
+*/
 
 // Authentication Architecture:
 //
@@ -24,19 +24,18 @@ import {
   LockIcon,
   MailIcon,
   ShoppingBasket,
-  UserIcon
+  UserIcon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth/useAuth";
+import { api } from "@/lib/api";
+import toast from "react-hot-toast";
 
 function Login() {
-  /* ===========================
-  Component State
-  Stores auth mode and form values
-=========================== */
+  /* Component State: Stores auth mode and form values */
   const [isLoginState, setIsLoginState] = useState(true);
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -50,24 +49,19 @@ function Login() {
 
   // Prevent logged-in users from visiting the auth page again.
   useEffect(() => {
+    // Logged-in customers should not remain on the login page.
     if (!authLoading && user) {
       router.replace("/");
     }
   }, [authLoading, user, router]);
 
-  /* ===========================
-  Form Submit Handler
-
-  Current:
-  - simulate API delay
-  - show loading state
-=========================== */
+  /* Form Submit Handler */
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       // Choose login or registration endpoint based on current mode.
-      const endpoint = isLoginState ? "/api/auth/login" : "/api/auth/register";
+      const endpoint = isLoginState ? "/auth/login" : "/auth/register";
 
       // Build request body expected by the backend API.
       const payload = isLoginState
@@ -81,21 +75,24 @@ function Login() {
             password,
           };
 
+      const toastMessage = isLoginState
+        ? "Logged In Successfully"
+        : "Registered Successfully";
+
       // Send authentication request to the server.
-      const response = await fetch(endpoint, {
+      // Shared helper keeps customer authentication requests consistent.
+      await api<{
+        success: boolean;
+        user: {
+          _id: string;
+          name: string;
+          email: string;
+          isAdmin: boolean;
+        };
+      }>(endpoint, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(payload),
+        body: payload,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed");
-      }
 
       // Sync AuthContext with the newly created session.
       await refreshUser();
@@ -103,10 +100,19 @@ function Login() {
       // Move user into the storefront after authentication.
       router.push("/");
       router.refresh();
+      toast(toastMessage);
     } catch (error) {
+      // api() throws backend error messages, so the form can show them here.
       console.error(error);
 
-      alert(error instanceof Error ? error.message : "Login failed");
+      const message =
+        error instanceof Error
+          ? error.message
+          : isLoginState
+            ? "Login failed"
+            : "Registration failed";
+
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -124,10 +130,7 @@ function Login() {
 
   return (
     <div className="min-h-screen flex">
-      {/* ===========================
-          Left Hero Section
-          Hidden on mobile
-      =========================== */}
+      {/* Left Hero Section - Hidden on mobile */}
       <div className="hidden lg:flex lg:w-1/2 bg-app-green relative items-center justify-center">
         <Image
           src="/assets/hero_bg.jpeg"
@@ -146,9 +149,7 @@ function Login() {
           </p>
         </div>
       </div>
-      {/* ===========================
-        Authentication Form Section
-      =========================== */}
+      {/* Authentication Form Section */}
       <div className="flex-1 flex-center px-4 py-12 bg-app-cream">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
@@ -243,4 +244,4 @@ function Login() {
   );
 }
 
-export default Login
+export default Login;

@@ -3496,3 +3496,45 @@ implement admin delivery partner management and order assignment system
 - CRUD Operations
 - Client-Side Data Fetching
 - State Synchronization
+
+## Checkpoint: Shared Customer API Integration
+
+### Steps Taken
+
+- Added `lib/api.ts` as a shared typed API request helper.
+- Centralized `/api` route prefixing, JSON request headers, request body serialization, response parsing, and backend error handling.
+- Replaced direct customer-side API request logic with the shared `api()` helper across product, flash-deal, search, address, checkout, order, and tracking flows.
+- Applied typed API response contracts to keep frontend data handling consistent.
+- Preserved existing page, hook, cart, URL-filter, checkout, authentication, and tracking logic while changing only the API communication layer.
+
+### Progress
+
+- Customer-facing data flows now use one reusable API communication layer.
+- Product catalog, flash deals, product details, search, addresses, checkout, order history, order details, payment confirmation, and live tracking request backend data through `api.ts`.
+- API failures now follow a consistent error-message and toast-notification pattern across the updated files.
+
+### Concept
+
+- Shared API abstraction.
+- Centralized frontend-to-backend communication.
+- Typed API response handling.
+- Consistent error propagation.
+
+### Approach
+
+- Keep pages and hooks responsible for UI state and feature logic.
+- Keep request construction, response parsing, and failed-response handling inside `api.ts`.
+- Reuse the helper with typed generic responses for `GET`, `POST`, `PUT`, and `DELETE` requests.
+- Retain each feature’s existing loading, error, toast, redirect, cart, and polling behavior.
+
+### Techniques Used
+
+- Reusable API Helper
+- TypeScript Generics
+- REST API Requests
+- JSON Request Serialization
+- Centralized Response Parsing
+- Centralized Error Handling
+- Client-Side Data Fetching
+- Async/Await
+- Toast Notifications

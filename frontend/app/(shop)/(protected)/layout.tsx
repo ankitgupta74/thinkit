@@ -25,23 +25,19 @@ export default function ProtectedLayout({
 
   // Redirect guests to login page.
   useEffect(() => {
+    // Guest users must leave before protected page content can render.
     if (!loading && !user) {
       router.replace("/login");
     }
   }, [loading, user, router]);
 
-  // Wait until authentication status is known.
-  if (loading) {
+  // Do not mount protected child pages until customer authentication is confirmed.
+  if (loading || !user) {
     return (
       <div className="min-h-screen flex-center flex-col gap-4">
         <Loader />
       </div>
     );
-  }
-
-  // Redirect logic will handle unauthenticated users.
-  if (!user) {
-    return null;
   }
 
   // Render protected content for authenticated users.

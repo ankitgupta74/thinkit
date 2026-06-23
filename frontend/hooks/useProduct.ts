@@ -8,6 +8,8 @@
 
 import { useEffect, useState } from "react";
 import { Product } from "@/types";
+import { api } from "@/lib/api";
+import toast from "react-hot-toast";
 
 // Hook receives UI state only.
 // Hook decides how products should be transformed.
@@ -49,15 +51,14 @@ function useProducts({
     const loadProducts = async () => {
       try {
         setLoading(true);
+        setError("");
 
-        // Load latest product catalog from backend.
-        const response = await fetch("/api/products");
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error("Failed to load products");
-        }
+        // Load latest product catalog through the shared API helper.
+        // Shared helper adds the /api prefix and gives one common error-handling pattern.
+        const data = await api<{
+          success: boolean;
+          products: Product[];
+        }>("/products");
 
         // Start with all products before applying filters.
         let filteredProducts = [...data.products];
@@ -129,12 +130,20 @@ function useProducts({
 
         setLoading(false);
       } catch (error) {
+        // If the request fails, clear old products so the UI does not show stale results.
         console.error(error);
 
         setError("Failed to load products");
 
         // Keep UI stable if API request fails.
         setProducts([]);
+
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to load products. Please try again.";
+
+        toast.error(message);
       } finally {
         setLoading(false);
       }

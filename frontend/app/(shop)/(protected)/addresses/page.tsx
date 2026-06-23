@@ -10,15 +10,18 @@
 import AddressCard from "@/components/address/AddressCard";
 import AddressForm from "@/components/address/AddressForm";
 import Loader from "@/components/ui/Loader";
+import { api } from "@/lib/api";
 import type { Address } from "@/types";
 import { MapPinIcon, PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 // Customer address management page.
 function Address() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, seteditingId] = useState<string | null>(null);
   const [form, setForm] = useState({
     label: "",
@@ -45,62 +48,100 @@ function Address() {
 
   // Load saved addresses belonging to the logged-in user.
   const loadAddresses = async () => {
-    // Fetch addresses from backend API.
-    const response = await fetch("/api/addresses", {
-      credentials: "include",
+    // Shared helper requests the current user's saved addresses from the backend.
+    const data = await api<{
+      success: boolean;
+      addresses: Address[];
+    }>("/addresses");
+
+    setAddresses(data.addresses);
+  };
+
+  // Gets the user's current device coordinates for the delivery address.
+  const getLocation = (): Promise<{ lat: number; lng: number }> => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error("Geolocation is not supported by this browser."));
+        return;
+      }
+
+      // Browser asks for location permission, then returns the device coordinates.
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          reject(new Error(error.message || "Unable to get your location."));
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 15000,
+          maximumAge: 60000,
+        },
+      );
     });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      setAddresses(data.addresses);
-    }
   };
 
   // Handles both create and update address operations.
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
 
-    // Edit mode: update existing address.
-    if (editingId) {
-      const response = await fetch(`/api/addresses/${editingId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(form),
-      });
-
-      if (response.ok) {
-        await loadAddresses();
-      }
-
-      resetForm();
-
+    // Stops duplicate clicks while location and API requests are running.
+    if (isSubmitting) {
       return;
     }
-    // Create mode: add a new address.
-    else {
-      const response = await fetch("/api/addresses", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(form),
-      });
 
-      if (response.ok) {
-        try {
-          await loadAddresses();
-        } catch (error) {
-          console.error(error);
-        }
+    setIsSubmitting(true);
+
+    try {
+      // Get fresh coordinates before saving, so this address can later be used for delivery tracking.
+      const coordinates = await getLocation();
+
+      // Combine typed address form values with the location data required by the backend.
+      const payload = {
+        ...form,
+        ...coordinates,
+      };
+
+      // Same form supports both actions: ID means update; no ID means create.
+      if (editingId) {
+        await api<{
+          success: boolean;
+          address: Address;
+        }>(`/addresses/${editingId}`, {
+          method: "PUT",
+          body: payload,
+        });
+        toast.success("Address Updated");
+      } else {
+        await api<{
+          success: boolean;
+          address: Address;
+        }>("/addresses", {
+          method: "POST",
+          body: payload,
+        });
+        toast.success("Address Uploaded");
       }
-    }
 
-    resetForm();
+      // Reload from database so the visible list matches the saved backend data.
+      await loadAddresses();
+      resetForm();
+    } catch (error) {
+      console.error(error);
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to submit address. Please try again.";
+
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Populate form with existing address data for editing.
@@ -120,16 +161,24 @@ function Address() {
   // Remove address and refresh list.
   const onDeleteHandler = async (id: string) => {
     try {
-      const response = await fetch(`/api/addresses/${id}`, {
+      // Delete one address by its ID; backend also checks that it belongs to this user.
+      await api<{
+        success: boolean;
+      }>(`/addresses/${id}`, {
         method: "DELETE",
-        credentials: "include",
       });
 
-      if (response.ok) {
-        await loadAddresses();
-      }
+      await loadAddresses();
+      toast.success("Address removed");
     } catch (error) {
       console.error(error);
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to delete address. Please try again.";
+
+      toast.error(message);
     }
   };
 
@@ -140,6 +189,13 @@ function Address() {
         await loadAddresses();
       } catch (error) {
         console.error(error);
+
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to initialize addresses. Please try again.";
+
+        toast.error(message);
       } finally {
         setLoading(false);
       }
@@ -178,6 +234,7 @@ function Address() {
             form={form}
             setForm={setForm}
             editingID={editingId}
+            isSubmitting={isSubmitting}
           />
         )}
         {/* Address List */}

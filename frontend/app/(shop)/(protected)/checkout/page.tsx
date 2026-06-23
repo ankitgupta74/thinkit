@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { api } from "@/lib/api";
+import { toast } from "react-hot-toast/headless";
 
 // Multi-step checkout process.
 function Checkout() {
@@ -40,28 +42,34 @@ function Checkout() {
     async function loadAddresses() {
       try {
         // Fetch saved delivery addresses.
-        const response = await fetch("/api/addresses", {
-          credentials: "include",
-        });
+        // Load addresses from the backend instead of depending on old user data in memory.
+        const data = await api<{
+          success: boolean;
+          addresses: Address[];
+        }>("/addresses");
 
-        const data = await response.json();
+        // Keep one safe array value even if backend returns no saved addresses.
+        const loadedAddresses = data.addresses || [];
 
-        if (response.ok) {
-          const loadedAddresses = data.addresses || [];
+        setAddresses(loadedAddresses);
 
-          setAddresses(loadedAddresses);
+        // Prefer default address, otherwise use first saved address.
+        const defaultAddress =
+          loadedAddresses.find((savedAddress) => savedAddress.isDefault) ||
+          loadedAddresses[0];
 
-          // Prefer default address, otherwise use first saved address.
-          const defaultAddress =
-            loadedAddresses.find((a: Address) => a.isDefault) ||
-            loadedAddresses[0];
-
-          if (defaultAddress) {
-            setAddress(defaultAddress);
-          }
+        if (defaultAddress) {
+          setAddress(defaultAddress);
         }
       } catch (error) {
         console.error(error);
+
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to load addresses. Please try again.";
+
+        toast.error(message);
       } finally {
         setAddressesLoading(false);
       }
@@ -107,43 +115,63 @@ function Checkout() {
     try {
       setLoading(true);
 
+      if (!address) {
+        throw new Error("Please select a delivery address.");
+      }
+
       // Send order creation request to backend.
-      const response = await fetch("/api/orders", {
+      // Backend creates the order and decides whether payment needs Stripe Checkout.
+      const data = await api<{
+        success: boolean;
+        order?: {
+          _id: string;
+        };
+        orderId?: string;
+        checkoutUrl?: string | null;
+      }>("/orders", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
+        body: {
           // Send only essential order data to backend.
+          // Send product IDs and quantities only; backend reads trusted product prices itself.
           items: items.map((item) => ({
             product: item.product._id,
             quantity: item.quantity,
           })),
 
           shippingAddress: address,
-
           paymentMethod,
-        }),
+        },
       });
 
-      const data = await response.json();
-
-      console.log("Create Order Response:", data);
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to create order");
+      // Card payment returns Stripe's hosted Checkout URL.
+      if (data.checkoutUrl) {
+        // Leave this app temporarily and let Stripe collect the card payment securely.
+        window.location.href = data.checkoutUrl;
+        return;
       }
 
       // Order completed successfully.
+      // Non-card order is complete here, so remove purchased items from local cart state.
       clearCart();
 
       // Redirect customer to order history.
-      router.push("/orders");
+      if (!data.order?._id) {
+        throw new Error(
+          "Order was created but no checkout destination was returned.",
+        );
+      }
+
+      router.push(`/orders/${data.order._id}`);
+      toast.success("Order placed successfully");
     } catch (error) {
       console.error(error);
 
-      alert(error instanceof Error ? error.message : "Failed to place order");
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to place your order. Please try again.";
+
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -166,7 +194,7 @@ function Checkout() {
           <button
             className="px-5 py-2.5 bg-app-green text-white text-sm font-medium rounded-xl hover:bg-app-green-light transition-colors"
             type="button"
-            onClick={() => router.push("products")}
+            onClick={() => router.push("/products")}
           >
             Browse Products
           </button>

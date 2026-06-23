@@ -5,6 +5,7 @@ import { BikeIcon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { api } from "@/lib/api";
 
 export default function DeliveryLogin() {
   // Stores the email entered by the delivery partner
@@ -31,23 +32,21 @@ export default function DeliveryLogin() {
       setLoading(true);
 
       // Ask backend to verify rider credentials.
-      const response = await fetch("/api/deliveryPartners/auth/login", {
+      // Shared helper sends JSON, includes cookies, and throws backend errors.
+      await api<{
+        success: boolean;
+        partner: {
+          _id: string;
+          name: string;
+          email: string;
+        };
+      }>("/deliveryPartners/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+        body: {
           email,
           password,
-        }),
+        },
       });
-
-      const data = await response.json();
-
-      if (!data.success) {
-        toast.error(data.message || "Login failed");
-        return;
-      }
 
       toast.success("Welcome back");
 
@@ -55,7 +54,7 @@ export default function DeliveryLogin() {
       router.push("/delivery");
     } catch (error) {
       console.error(error);
-      toast.error("Login failed");
+      toast.error(error instanceof Error ? error.message : "Login failed");
     } finally {
       setLoading(false);
     }

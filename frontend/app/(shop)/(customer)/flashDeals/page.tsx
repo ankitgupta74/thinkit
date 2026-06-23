@@ -15,6 +15,8 @@ import {
   useRouter,
   usePathname
 } from "next/navigation";
+import { api } from "@/lib/api";
+import toast from "react-hot-toast";
 
 function FlashDeals() {
   // URL can store page/filter info.
@@ -38,7 +40,6 @@ function FlashDeals() {
   // If data can be calculated, avoid extra state.
   // useMemo prevents unnecessary recalculation.
 
-
   // Custom hook handles pagination logic.
   // Component only consumes final results.
   const { paginatedItems, totalPages } = usePagination({
@@ -47,8 +48,7 @@ function FlashDeals() {
     itemsPerPage: 10,
   });
 
-  // Simulate loading behavior.
-  // Later replace with real API fetching.
+  // Load flash deals from backend when this page opens.
   useEffect(() => {
     // Load latest products from backend and extract active flash deals.
     const loadDeals = async () => {
@@ -56,24 +56,28 @@ function FlashDeals() {
         setLoading(true);
 
         // Fetch product catalog from API.
-        const response = await fetch("/api/products");
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error("Failed to load deals");
-        }
+        // Load flash-deal products through the shared API helper.
+        // Shared helper adds the /api prefix and handles failed responses consistently.
+        const data = await api<{
+          success: boolean;
+          products: Product[];
+        }>("/products/flashDeals");
 
         // Only show discounted products that are still available.
-        const flashDeals = data.products.filter(
-          (product: Product) => product.discount > 0 && product.stock > 0,
-        );
-
-        setProducts(flashDeals);
-      } catch (error) {
+        // Backend already returns only active flash-deal products.
+        setProducts(data.products);
+      } catch (error: unknown) {
+        // api() throws the backend message, which we show through the toast.
         console.error(error);
 
         setError("Failed to load deals");
+
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to load flash deals. Please try again.";
+
+        toast.error(message);
       } finally {
         setLoading(false);
       }

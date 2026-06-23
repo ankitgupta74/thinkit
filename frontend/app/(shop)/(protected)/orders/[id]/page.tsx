@@ -13,11 +13,26 @@ import OrderOTP from "@/components/order/OrderOTP";
 import OrderTimeLine from "@/components/order/OrderTimeLine";
 import Loader from "@/components/ui/Loader";
 import type { LiveLocation, Order } from "@/types";
-import { ArrowLeftIcon, MapPinIcon, PhoneIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  MapPinIcon,
+  PhoneIcon
+} from "lucide-react";
 import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
+import {
+  useParams,
+  useRouter,
+  useSearchParams
+} from "next/navigation";
 import { CURRENCY } from "@/utils/config";
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState
+} from "react";
+import { api } from "@/lib/api";
+import { useCart } from "@/context/cart/useCart";
+import toast from "react-hot-toast";
 
 const LiveMap = dynamic(() => import("@/components/order/LiveMap"), {
   ssr: false,
@@ -27,6 +42,14 @@ const LiveMap = dynamic(() => import("@/components/order/LiveMap"), {
 function Order() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
+
+  const searchParams = useSearchParams();
+  const paymentResult = searchParams.get("payment");
+
+  const { clearCart } = useCart();
+
+  // Prevent the payment-success action from running again during rerenders.
+  const hasHandledPaymentSuccess = useRef(false);
 
   // Complete order information.
   const [order, setOrder] = useState<Order | null>(null);
@@ -43,17 +66,45 @@ function Order() {
         setLoading(true);
 
         // Fetch order information from backend.
-        const response = await fetch(`/api/orders/${id}`, {
-          credentials: "include",
-        });
+        // Load the latest saved order state after opening this tracking page.
+        const data = await api<{
+          success: boolean;
+          order: Order;
+        }>(`/orders/${id}`);
 
-        const data = await response.json();
+        setOrder(data.order);
 
-        if (data.success) {
-          setOrder(data.order);
+        // Stripe can redirect before the webhook finishes updating MongoDB.
+        // Retry once shortly after the first request when payment is still processing.
+        if (
+          paymentResult === "success" &&
+          !data.order.isPaid &&
+          data.order.status === "Payment Pending"
+        ) {
+          // Give Stripe webhook a short time to update payment status in the database.
+          setTimeout(async () => {
+            try {
+              // Fetch again to receive the updated payment result from the backend.
+              const refreshedData = await api<{
+                success: boolean;
+                order: Order;
+              }>(`/orders/${id}`);
+
+              setOrder(refreshedData.order);
+            } catch (error) {
+              console.error(error);
+            }
+          }, 1500);
         }
       } catch (error) {
         console.error(error);
+
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to load your order. Please try again.";
+
+        toast.error(message);
       } finally {
         setLoading(false);
       }
@@ -62,31 +113,92 @@ function Order() {
     if (id) {
       loadOrder();
     }
-  }, [id]);
+  }, [id, paymentResult]);
 
-  // Load latest delivery location separately.
+  // Clear the cart once after the backend confirms the Stripe payment.
   useEffect(() => {
+    if (
+      paymentResult !== "success" ||
+      !order?.isPaid ||
+      hasHandledPaymentSuccess.current
+    ) {
+      return;
+    }
+
+    // Mark first so rerenders cannot start the same payment-success flow again.
+    hasHandledPaymentSuccess.current = true;
+
+    // Cart is cleared only after backend confirms payment, not just after Stripe redirects back.
+    clearCart();
+
+    toast.success("Payment successful. Your order has been placed.");
+
+    // Remove the Stripe result query parameter without adding browser history.
+    router.replace(`/orders/${order._id}`);
+  }, [paymentResult, order?.isPaid, order?._id, clearCart, router]);
+
+  // Refresh rider location every 10 seconds only while delivery is active.
+  useEffect(() => {
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+
+    // One tracking request: get rider coordinates and the latest delivery status together.
     const loadLiveLocation = async () => {
       try {
-        // Fetch live tracking information.
-        const response = await fetch(`/api/orders/${id}/location`, {
-          credentials: "include",
-        });
+        // This endpoint returns only tracking data for the current customer's order.
+        const data = await api<{
+          success: boolean;
+          liveLocation: LiveLocation | null;
+          status: Order["status"];
+        }>(`/orders/${id}/location`);
 
-        const data = await response.json();
+        // Update map state with the newest rider position from the backend.
+        setLiveLocation(data.liveLocation);
 
-        if (data.success) {
-          setLiveLocation(data.liveLocation);
+        // Keep the visible order status synchronized with tracking updates.
+        setOrder((currentOrder) =>
+          currentOrder
+            ? {
+                ...currentOrder,
+                status: data.status,
+              }
+            : currentOrder,
+        );
+
+        // Stop polling immediately once delivery is no longer active.
+        if (data.status !== "Out for Delivery" && intervalId !== null) {
+          clearInterval(intervalId);
+          intervalId = null;
         }
       } catch (error) {
         console.error(error);
+
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to load live location. Please try again.";
+
+        toast.error(message);
       }
     };
 
-    if (id) {
-      loadLiveLocation();
+    // Poll only for an active delivery; other order states do not need location updates.
+    if (!id || order?.status !== "Out for Delivery") {
+      return;
     }
-  }, [id]);
+
+    // Fetch immediately instead of making the customer wait 10 seconds.
+    loadLiveLocation();
+
+    // Continue refreshing while the rider is delivering.
+    intervalId = setInterval(loadLiveLocation, 10000);
+
+    // Stop polling when the user leaves this order page.
+    return () => {
+      if (intervalId !== null) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [id, order?.status]);
 
   if (loading) {
     return <Loader />;
@@ -123,7 +235,7 @@ function Order() {
             </p>
           </div>
           <span
-            className={`px-4 py-1.5 text-sm font-semibold rounded-full ${order.status === "Delivered" ? "bg-green-100 to-green-700" : order.status === "Cancelled" ? "bg-red-100 text-red-700" : "bg-app-orange/10 text-app-orange"}`}
+            className={`px-4 py-1.5 text-sm font-semibold rounded-full ${order.status === "Delivered" ? "bg-green-100 text-green-700" : order.status === "Cancelled" ? "bg-red-100 text-red-700" : "bg-app-orange/10 text-app-orange"}`}
           >
             {order.status}
           </span>
