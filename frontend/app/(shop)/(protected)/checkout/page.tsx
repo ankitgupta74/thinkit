@@ -83,7 +83,7 @@ function Checkout() {
   const [loading, setLoading] = useState(false);
 
   // Free delivery for qualifying orders.
-  const deliveryFee = cartTotal > 149 ? 0 : 99;
+  const deliveryFee = cartTotal > 149 ? 0 : 49;
   const tax = cartTotal * 0.08;
   const total = cartTotal + deliveryFee + tax;
 
