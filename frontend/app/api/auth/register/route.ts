@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import User from "@/models/User";
 import { connectDB } from "@/lib/mongodb";
@@ -6,7 +6,7 @@ import { generateToken } from "@/lib/jwt";
 import { isAdminEmail } from "@/lib/admin";
 import { serverError } from "@/lib/apiError";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     // Read registration details sent from the signup form
     const body = await request.json();

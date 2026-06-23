@@ -8,7 +8,7 @@ import {
   PlusIcon,
   ShoppingBagIcon,
   Trash2Icon,
-  XIcon
+  XIcon,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -21,7 +21,7 @@ function CartSidebar() {
     removeFromCart,
     isCartOpen,
     setIsCartOpen,
-    cartTotal
+    cartTotal,
   } = useCart();
 
   if (!isCartOpen) return null;
@@ -112,7 +112,8 @@ function CartSidebar() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-semibold">
-                        {CURRENCY}{(item.product.price * item.quantity).toFixed(2)}
+                        {CURRENCY}
+                        {(item.product.price * item.quantity).toFixed(2)}
                       </span>
                       <button
                         type="button"
@@ -133,44 +134,44 @@ function CartSidebar() {
         {items.length > 0 && (
           <div className="p-5 border-t border-app-border space-y-3">
             <div className="flex justify-between text-sm">
-              <span className="text-app-text-light">
-                Subtotal
-              </span>
+              <span className="text-app-text-light">Subtotal</span>
               <span className="font-medium">
-                {CURRENCY}{cartTotal.toFixed(2)}
+                {CURRENCY}
+                {cartTotal.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-app-text-light">
-                Delivery Charges
-              </span>
+              <span className="text-app-text-light">Delivery Charges</span>
               <span className="font-medium">
-                {deliveryFee === 0 ? <span className="text-app-success">Free</span> : `${CURRENCY}${deliveryFee.toFixed(2)}`}
+                {deliveryFee === 0 ? (
+                  <span className="text-app-success">Free</span>
+                ) : (
+                  `${CURRENCY}${deliveryFee.toFixed(2)}`
+                )}
               </span>
             </div>
-            {
-              deliveryFee > 0 && <p className="text-xs text-app-text-light text-center">
+            {deliveryFee > 0 && (
+              <p className="text-xs text-app-text-light text-center">
                 Free delivery on orders over {CURRENCY}149!
               </p>
-            }
+            )}
             <div className="flex justify-between text-base font-semibold border-t border-app-border pt-3">
+              <span>Total</span>
               <span>
-                Total
-              </span>
-              <span>
-                {CURRENCY}{grandTotal.toFixed(2)}
+                {CURRENCY}
+                {grandTotal.toFixed(2)}
               </span>
             </div>
             <button
               type="button"
               onClick={() => {
                 setIsCartOpen(false);
-                router.push('/checkout');
+                router.push("/checkout");
                 window.scrollTo(0, 0);
               }}
               className="w-full py-3 bg-app-orange text-white font-semibold rounded-xl hover:bg-app-orange-dark transition-colors flex-center gap-2 active:scale-[0.98]"
             >
-              Proceed to checkout <ArrowRightIcon className="size-4"/>
+              Proceed to checkout <ArrowRightIcon className="size-4" />
             </button>
           </div>
         )}

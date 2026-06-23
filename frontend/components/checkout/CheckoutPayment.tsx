@@ -25,7 +25,7 @@ export default function CheckoutPayment({
             desc: "Pay securely with your card",
           },
           {
-            value: "cash",
+            value: "cod",
             label: "Cash on Delivery",
             desc: "Pay when you receive",
           },

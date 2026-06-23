@@ -1,12 +1,9 @@
 "use client";
 
 import { useCart } from "@/context/cart/useCart";
-import { Product } from "@/types"
+import { Product } from "@/types";
 import { CURRENCY } from "@/utils/config";
-import {
-  Plus,
-  Star
-} from "lucide-react";
+import { Plus, Star } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -15,10 +12,7 @@ interface Props {
   priority?: boolean;
 }
 
-function ProductCard({
-  product,
-  priority = false
-}: Props) {
+function ProductCard({ product, priority = false }: Props) {
   const router = useRouter();
 
   const { addToCart } = useCart();
@@ -39,11 +33,11 @@ function ProductCard({
         />
         {/* Badge */}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-          {
-            product.discount > 0 && <span className="px-2 py-0.5 text-[10px] font-semibold uppercase bg-app-orange text-white rounded-full">
+          {product.discount > 0 && (
+            <span className="px-2 py-0.5 text-[10px] font-semibold uppercase bg-app-orange text-white rounded-full">
               {product.discount}% OFF
             </span>
-          }
+          )}
         </div>
       </div>
       {/* Info */}
@@ -67,16 +61,18 @@ function ProductCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1 truncate">
             <span className="text-base font-medium">
-              {CURRENCY}{product.price.toFixed(1)}
+              {CURRENCY}
+              {product.price.toFixed(1)}
             </span>
             <span className="text-xs text-app-text-light block">
               /{product.unit}
             </span>
-            {
-              product.originalPrice > product.price && <span className="text-xs text-app-text-light line-through ml-1.5">
-                {CURRENCY}{product.originalPrice.toFixed(1)}
+            {product.originalPrice > product.price && (
+              <span className="text-xs text-app-text-light line-through ml-1.5">
+                {CURRENCY}
+                {product.originalPrice.toFixed(1)}
               </span>
-            }
+            )}
           </div>
           <button
             aria-label="Add To Cart Button"
@@ -92,7 +88,7 @@ function ProductCard({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default ProductCard
+export default ProductCard;

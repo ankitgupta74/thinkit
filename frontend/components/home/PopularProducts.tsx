@@ -8,6 +8,8 @@ import { Product } from "@/types";
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 import ProductCard from "../product/ProductCard";
+import { api } from "@/lib/api";
+import toast from "react-hot-toast";
 
 function PopularProducts() {
   // Stores products displayed in the section.
@@ -20,17 +22,23 @@ function PopularProducts() {
   useEffect(() => {
     async function loadProducts() {
       try {
-        // Get product data from the backend API.
-        const response = await fetch("/api/products");
+        // Get product data through the shared API helper.
+        const data = await api<{
+          success: boolean;
+          products: Product[];
+        }>("/products");
 
-        const data = await response.json();
-
-        if (response.ok) {
-          // Only show a limited number of products on the homepage.
-          setProducts(data.products.slice(0, 10));
-        }
-      } catch (error) {
+        // Only show a limited number of products on the homepage.
+        setProducts(data.products.slice(0, 10));
+      } catch (error: unknown) {
         console.error(error);
+
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to load popular products. Please try again.";
+
+        toast.error(message);
       } finally {
         setLoading(false);
       }

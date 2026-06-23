@@ -1,5 +1,10 @@
 import { Address } from "@/types";
-import { CheckIcon, MapPinIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import {
+  CheckIcon,
+  MapPinIcon,
+  PencilIcon,
+  Trash2Icon
+} from "lucide-react";
 
 interface AddressCardProps {
   address: Address;

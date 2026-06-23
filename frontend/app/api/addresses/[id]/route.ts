@@ -72,6 +72,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
     address.state = body.state;
     address.zip = body.zip;
     address.isDefault = body.isDefault;
+    address.lat = body.lat;
+    address.lng = body.lng;
 
     // Persist all address changes.
     await address.save();
@@ -96,7 +98,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 }
 
 // Removes one of the customer's saved addresses.
-export async function DELETE({ params }: Params) {
+export async function DELETE(_request: NextRequest, { params }: Params) {
   try {
     await connectDB();
 

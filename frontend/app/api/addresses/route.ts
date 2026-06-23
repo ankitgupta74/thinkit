@@ -4,7 +4,7 @@
 // POST → Create a new address
 
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
@@ -60,7 +60,7 @@ export async function GET() {
 }
 
 // Creates a new delivery address for the customer.
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     await connectDB();
 
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
     // Address information entered during profile setup or checkout.
     const body = await request.json();
 
-    const { label, address, city, state, zip, isDefault } = body;
+    const { label, address, city, state, zip, isDefault, lat, lng } = body;
 
     // Save a new address linked to the current user.
     const newAddress = await Address.create({
@@ -91,10 +91,8 @@ export async function POST(request: Request) {
       state,
       zip,
       isDefault,
-
-      // Placeholder coordinates until map/location integration is added.
-      lat: 0,
-      lng: 0,
+      lat,
+      lng,
 
       user: user._id,
     });
