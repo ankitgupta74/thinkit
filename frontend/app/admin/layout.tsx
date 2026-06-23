@@ -87,13 +87,12 @@ export default function AdminLayout({
   const pathname = usePathname();
 
   // Wait until authentication check finishes.
-  if (loading) {
-    return <Loader />;
-  }
-
-  // Stop rendering until access is verified.
-  if (!user || !user.isAdmin) {
-    return null;
+  if (loading || !user || !user.isAdmin) {
+    return (
+      <div className="min-h-screen flex-center flex-col gap-4">
+        <Loader />
+      </div>
+    );
   }
 
   return (

@@ -15,6 +15,7 @@ import Loader from "@/components/ui/Loader";
 import { CURRENCY } from "@/utils/config";
 import { ORDER_STATUSES } from "@/lib/orderStatus";
 import { statusColors } from "@/public/assets";
+import { api } from "@/lib/api";
 
 export default function AdminOrders() {
   // Stores all customer orders
@@ -37,22 +38,30 @@ export default function AdminOrders() {
     const fetchData = async () => {
       try {
         // Fetch all customer orders.
-        const ordersResponse = await fetch("/api/orders/all");
-        const ordersData = await ordersResponse.json();
+        const [ordersData, partnersData] = await Promise.all([
+          api<{
+            success: boolean;
+            orders: Order[];
+          }>("/orders/all"),
 
-        // Fetch delivery partners for assignment dropdown.
-        const partnersResponse = await fetch("/api/deliveryPartners");
-        const partnersData = await partnersResponse.json();
+          api<{
+            success: boolean;
+            partners: DeliveryPartner[];
+          }>("/deliveryPartners"),
+        ]);
 
-        if (ordersData.success) {
-          setOrders(ordersData.orders);
-        }
-
-        if (partnersData.success) {
-          setPartners(partnersData.partners);
-        }
+        setOrders(ordersData.orders);
+        setPartners(partnersData.partners);
       } catch (error) {
         console.error(error);
+
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to load orders. Please try again.";
+
+        toast.error(message);
+
       } finally {
         setLoading(false);
       }
@@ -62,40 +71,33 @@ export default function AdminOrders() {
   }, []);
 
   // Update order progress status.
-  const handleStatusChange = async (id: string, newStatus: string) => {
+  const handleStatusChange = async (id: string, newStatus: Order["status"]) => {
     try {
       // Send selected status to backend.
-      const response = await fetch(`/api/orders/${id}/status`, {
+      await api(`/orders/${id}/status`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+        body: {
           status: newStatus,
-        }),
+        },
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        toast.error(data.message || "Failed");
-
-        return;
-      }
-
       // Reflect status change instantly in UI.
-      if (data.success) {
-        setOrders((prev) =>
-          prev.map((order) =>
-            order._id === id ? { ...order, status: newStatus } : order,
-          ),
-        );
+      setOrders((prev) =>
+        prev.map((order) =>
+          order._id === id ? { ...order, status: newStatus } : order,
+        ),
+      );
 
-        toast.success("Status updated");
-      }
+      toast.success("Status updated");
     } catch (error) {
       console.error(error);
-      toast.error("Failed");
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to change status. Please try again.";
+
+      toast.error(message);
     }
   };
 
@@ -105,19 +107,16 @@ export default function AdminOrders() {
 
     try {
       // Create rider-order relationship in database.
-      const response = await fetch(`/api/orders/${assignModal}/assign`, {
+      const data = await api<{
+        success: boolean;
+        order: Order;
+      }>(`/orders/${assignModal}/assign`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+        body: {
           partnerId: selectedPartner,
-        }),
+        },
       });
 
-      const data = await response.json();
-
-      // Replace old order with updated order data.
       if (data.success) {
         setOrders((prev) =>
           prev.map((order) => (order._id === assignModal ? data.order : order)),
@@ -131,7 +130,13 @@ export default function AdminOrders() {
     } catch (error) {
       console.error(error);
 
-      toast.error("Assignment failed");
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to assign partner. Please try again.";
+
+      toast.error(message);
+
     }
   };
 
@@ -239,7 +244,10 @@ export default function AdminOrders() {
                         value={order.status}
                         // Send order id and newly selected status
                         onChange={(e) =>
-                          handleStatusChange(order._id, e.target.value)
+                          handleStatusChange(
+                            order._id,
+                            e.target.value as Order["status"],
+                          )
                         }
                         className={`px-3 py-1.5 rounded-lg text-xs font-semibold border-r-8 border-transparent outline-none cursor-pointer leading-tight ${statusColors[order.status] || "bg-zinc-100 text-zinc-800"}`}
                       >

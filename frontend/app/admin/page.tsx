@@ -18,6 +18,8 @@ import Link from "next/link";
 import { CURRENCY } from "@/utils/config";
 import Loader from "@/components/ui/Loader";
 import { statusColors } from "@/public/assets";
+import { api } from "@/lib/api";
+import toast from "react-hot-toast";
 
 interface RecentOrder {
   _id: string;
@@ -55,16 +57,22 @@ export default function AdminDashboard() {
     const fetchDashboard = async () => {
       try {
         // Fetch admin dashboard data from backend.
-        const response = await fetch("/api/admin/dashboard");
+        const data = await api<Stats & { success: boolean }>(
+          "/admin/dashboard",
+        );
 
-        const data = await response.json();
-
-        if (data.success) {
-          // Store dashboard data for cards and tables.
-          setStats(data);
-        }
+        // Store dashboard data for cards and tables.
+        setStats(data);
       } catch (error) {
         console.error(error);
+
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to load dashboard. Please try again.";
+
+        toast.error(message);
+
       } finally {
         setLoading(false);
       }

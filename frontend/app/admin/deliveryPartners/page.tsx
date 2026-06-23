@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { DeliveryPartner, VehicleType } from "@/types";
 import Loader from "@/components/ui/Loader";
+import { api } from "@/lib/api";
+import toast from "react-hot-toast";
 
 export default function AdminDeliveryPartners() {
   // Stores all delivery partners shown on the page
@@ -74,15 +76,22 @@ export default function AdminDeliveryPartners() {
     const fetchPartners = async () => {
       try {
         // Fetch latest partner list for admin dashboard.
-        const response = await fetch("/api/deliveryPartners");
+        const data = await api<{
+          success: boolean;
+          partners: DeliveryPartner[];
+        }>("/deliveryPartners");
 
-        const data = await response.json();
-
-        if (data.success) {
-          setPartners(data.partners);
-        }
+        setPartners(data.partners);
       } catch (error) {
         console.error(error);
+
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to load partners. Please try again.";
+
+        toast.error(message);
+
       } finally {
         setLoading(false);
       }
@@ -99,15 +108,13 @@ export default function AdminDeliveryPartners() {
       setSaving(true);
 
       // Send onboarding form data to backend.
-      const response = await fetch("/api/deliveryPartners", {
+      const data = await api<{
+        success: boolean;
+        partner: DeliveryPartner;
+      }>("/deliveryPartners", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
+        body: form,
       });
-
-      const data = await response.json();
 
       // Update UI immediately without reloading page.
       if (data.success) {
@@ -125,6 +132,14 @@ export default function AdminDeliveryPartners() {
       }
     } catch (error) {
       console.error(error);
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to submit your credentials. Please try again.";
+
+      toast.error(message);
+
     } finally {
       setSaving(false);
     }
@@ -138,18 +153,13 @@ export default function AdminDeliveryPartners() {
     try {
       setSaving(true);
 
-      const response = await fetch(
-        `/api/deliveryPartners/${editingPartner._id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(editForm),
-        },
-      );
-
-      const data = await response.json();
+      const data = await api<{
+        success: boolean;
+        partner: DeliveryPartner;
+      }>(`/deliveryPartners/${editingPartner._id}`, {
+        method: "PUT",
+        body: editForm,
+      });
 
       if (data.success) {
         setPartners((prev) =>
@@ -170,6 +180,14 @@ export default function AdminDeliveryPartners() {
       }
     } catch (error) {
       console.error(error);
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to update your credentials. Please try again.";
+
+      toast.error(message);
+
     } finally {
       setSaving(false);
     }
@@ -179,17 +197,15 @@ export default function AdminDeliveryPartners() {
   const toggleActive = async (id: string, isActive: boolean) => {
     try {
       // Update partner active status in database.
-      const response = await fetch(`/api/deliveryPartners/${id}`, {
+      const data = await api<{
+        success: boolean;
+        partner: DeliveryPartner;
+      }>(`/deliveryPartners/${id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+        body: {
           isActive: !isActive,
-        }),
+        },
       });
-
-      const data = await response.json();
 
       // Keep frontend state aligned with backend response.
       if (data.success) {
@@ -206,6 +222,14 @@ export default function AdminDeliveryPartners() {
       }
     } catch (error) {
       console.error(error);
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to toggle. Please try again.";
+
+      toast.error(message);
+
     }
   };
 

@@ -15,6 +15,8 @@ import { PlusIcon, EditIcon, XIcon } from "lucide-react";
 import { CURRENCY } from "@/utils/config";
 import type { Product } from "@/types";
 import Loader from "@/components/ui/Loader";
+import { api } from "@/lib/api";
+import toast from "react-hot-toast";
 
 export default function AdminProducts() {
   // Stores all products displayed in the admin table
@@ -28,15 +30,22 @@ export default function AdminProducts() {
     const fetchProducts = async () => {
       try {
         // Fetch latest products from backend.
-        const response = await fetch("/api/products");
+        const data = await api<{
+          success: boolean;
+          products: Product[];
+        }>("/products");
 
-        const data = await response.json();
-
-        if (data.success) {
-          setProducts(data.products);
-        }
+        setProducts(data.products);
       } catch (error) {
         console.error(error);
+
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to load products. Please try again.";
+
+        toast.error(message);
+
       } finally {
         setLoading(false);
       }
@@ -62,27 +71,30 @@ export default function AdminProducts() {
       if (!product) return;
 
       // Reuse update endpoint and set stock to zero.
-      const response = await fetch(`/api/products/${id}`, {
+      await api(`/products/${id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+        body: {
           ...product,
           stock: 0,
-        }),
+        },
       });
 
-      const data = await response.json();
+      // Update UI immediately after successful change.
+      setProducts((prev) =>
+        prev.map((p) => (p._id === id ? { ...p, stock: 0 } : p)),
+      );
 
-      if (data.success) {
-        // Update UI immediately after successful change.
-        setProducts((prev) =>
-          prev.map((p) => (p._id === id ? { ...p, stock: 0 } : p)),
-        );
-      }
+      toast.success("Marked out of stock");
     } catch (error) {
       console.error(error);
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Mark out of Stock failed. Please try again.";
+
+      toast.error(message);
+
     }
   };
 

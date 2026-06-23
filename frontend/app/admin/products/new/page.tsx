@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  useState,
-  useEffect
-} from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
@@ -11,6 +8,8 @@ import { CURRENCY } from "@/utils/config";
 import { ArrowLeftIcon } from "lucide-react";
 import { categoriesData } from "@/public/assets";
 import Loader from "@/components/ui/Loader";
+import { api } from "@/lib/api";
+import toast from "react-hot-toast";
 
 export default function AdminProductForm() {
   const searchParams = useSearchParams();
@@ -47,31 +46,53 @@ export default function AdminProductForm() {
   useEffect(() => {
     // When editing, load existing product data into the form
     const fetchData = async () => {
-      if (isEdit) {
-        // Find the product that matches the id from the URL
-        const response = await fetch(`/api/products/${id}`);
+      try {
+        if (isEdit) {
+          // Find the product that matches the id from the URL
+          const data = await api<{
+            success: boolean;
+            product: {
+              name: string;
+              description: string;
+              price: number;
+              originalPrice: number;
+              image: string;
+              category: string;
+              unit: string;
+              stock: number;
+              isOrganic: boolean;
+            };
+          }>(`/products/${id}`);
 
-        const data = await response.json();
+          if (data.success) {
+            const product = data.product;
 
-        if (data.success) {
-          const product = data.product;
-
-          setFormData({
-            name: product.name,
-            description: product.description,
-            price: String(product.price),
-            originalPrice: String(product.originalPrice),
-            image: product.image,
-            category: product.category,
-            unit: product.unit,
-            stock: String(product.stock),
-            isOrganic: product.isOrganic,
-          });
+            setFormData({
+              name: product.name,
+              description: product.description,
+              price: String(product.price),
+              originalPrice: String(product.originalPrice),
+              image: product.image,
+              category: product.category,
+              unit: product.unit,
+              stock: String(product.stock),
+              isOrganic: product.isOrganic,
+            });
+          }
         }
-      }
+      } catch (error) {
+        console.error(error);
 
-      // Hide loader after product data is ready
-      setLoading(false);
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to save product. Please try again.";
+
+        toast.error(message);
+      } finally {
+        // Hide loader after product data is ready
+        setLoading(false);
+      }
     };
     fetchData();
   }, [id, isEdit]);
@@ -86,22 +107,19 @@ export default function AdminProductForm() {
     uploadData.append("image", imageFile);
 
     // Send image file to upload endpoint.
-    const response = await fetch("/api/upload", {
+    const data = await api<{
+      success: boolean;
+      url: string;
+    }>("/upload", {
       method: "POST",
       body: uploadData,
     });
-
-    const data = await response.json();
-
-    if (!data.success) {
-      throw new Error("Upload failed");
-    }
 
     return data.url;
   };
 
   // Handles both create and edit product operations.
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
 
     try {
@@ -120,25 +138,24 @@ export default function AdminProductForm() {
       };
 
       // Reuse same form for both product creation and editing.
-      const response = await fetch(
-        isEdit ? `/api/products/${id}` : "/api/products",
-        {
-          method: isEdit ? "PUT" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        },
-      );
+      await api(isEdit ? `/products/${id}` : "/products", {
+        method: isEdit ? "PUT" : "POST",
+        body: payload,
+      });
 
-      const data = await response.json();
+      // Return to products page after successful save.
+      window.location.href = "/admin/products";
 
-      if (data.success) {
-        // Return to products page after successful save.
-        window.location.href = "/admin/products";
-      }
+      toast.success("Changes Saved");
     } catch (error) {
       console.error(error);
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to submit products. Please try again.";
+
+      toast.error(message);
     } finally {
       setSaving(false);
     }
