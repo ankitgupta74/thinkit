@@ -1,82 +1,82 @@
 "use client";
 
-import {
-  ReactNode,        // Allows children components.
-  useState        // Stores state.
-} from "react";
-import { useCartStorage } from "./hooks/useCartStorage";
+import type { ReactNode } from "react";
+import { useMemo, useState } from "react";
+import type { Product } from "@/types";
+
 import CartContext from "./cartContext";
-import { Product } from "@/types";
+import { useCartStorage } from "./hooks/useCartStorage";
 import {
   addItemToCart,
+  clearCart,
+  getCartCount,
+  getCartTotal,
   removeFromCart,
   updateQuantity,
-  clearCart,
-  cartCount,
-  cartTotal
+} from "./utils/cartHelpers";
+
+interface CartProviderProps {
+  children: ReactNode;
 }
-from "./utils/cartHelpers";
 
-export function CartProvider({ children }: { children: ReactNode }) {
-
+// Provides cart state and cart actions to the full application.
+export function CartProvider({ children }: CartProviderProps) {
+  // Controls whether the cart sidebar is visible.
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const {
-    items,
-    setItems
-  } = useCartStorage();
+  // Stores cart items in React state and browser localStorage.
+  const { items, setItems } = useCartStorage();
 
-  const addToCart=(
-    product: Product,
-    quantity=1
-    )=>{
+  // Adds a product and opens the cart sidebar for immediate feedback.
+  const addToCart = (product: Product, quantity = 1) => {
+    // Use previous state because cart updates depend on the latest cart contents.
+    setItems((previousItems) =>
+      addItemToCart(previousItems, product, quantity),
+    );
 
-    setItems(prev=>
-    addItemToCart(
-    prev,
-    product,
-    quantity
-    ))
+    setIsCartOpen(true);
+  };
 
-    setIsCartOpen(true)
+  // Removes one product from the cart.
+  const removeItem = (productId: string) => {
+    setItems((previousItems) => removeFromCart(previousItems, productId));
+  };
 
-  }
+  // Updates one product quantity.
+  const updateItemQuantity = (productId: string, quantity: number) => {
+    setItems((previousItems) =>
+      updateQuantity(previousItems, productId, quantity),
+    );
+  };
 
-  const removeItem=(productId:string)=>{
-    setItems(prev => removeFromCart(prev, productId));
-  }
-
-  const updateItemQuantity=(
-    productId:string,
-    quantity:number
-  )=>{
-    setItems(prev => updateQuantity(prev, productId, quantity));
-  }
-
-  const clear=()=>{
+  // Clears cart items and closes the sidebar.
+  const clear = () => {
     setItems(clearCart());
     setIsCartOpen(false);
-  }
+  };
 
-  const totalCount =
-    cartCount(items);
+  // Recalculate derived values only when cart items change.
+  const cartCount = useMemo(() => getCartCount(items), [items]);
 
-  const totalPrice =
-    cartTotal(items);
-  
-  // Provider makes cart data/functions available to every child component.
-  return <CartContext.Provider value={{
-    // Everything placed here becomes accessible via useCart().
-    items,
-    addToCart,
-    removeFromCart:removeItem,
-    updateQuantity:updateItemQuantity,
-    clearCart:clear,
-    cartCount:totalCount,
-    cartTotal:totalPrice,
-    isCartOpen,
-    setIsCartOpen
-  }}>
-    {children}
-  </CartContext.Provider>
+  // Total changes only when items change, so memo avoids recalculating on sidebar-only updates.
+  const cartTotal = useMemo(() => getCartTotal(items), [items]);
+
+  return (
+    // Share one cart source with every component inside this provider.
+    <CartContext.Provider
+      value={{
+        items,
+        addToCart,
+        removeFromCart: removeItem,
+        updateQuantity: updateItemQuantity,
+        clearCart: clear,
+        cartCount,
+        cartTotal,
+        isCartOpen,
+        setIsCartOpen,
+      }}
+    >
+      {children}
+    </CartContext.Provider>
+  );
 }

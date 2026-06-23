@@ -1,7 +1,7 @@
-import { createContext } from "react";    // Creates shared storage.
-import CartContextType from "./types/cart.types";
+import { createContext } from "react";
+import type { CartContextType } from "./types/cart.types";
 
-// Creating Context
-const cartContext = createContext<CartContextType | undefined>(undefined);
+// Shared cart container used by CartProvider and useCart().
+const CartContext = createContext<CartContextType | undefined>(undefined);
 
-export default cartContext;
+export default CartContext;

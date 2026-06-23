@@ -1,32 +1,47 @@
 "use client";
 
-import { CartItem } from "@/types";
-import {
-  useEffect, // Runs side effects.
-  useState, // Stores state.
-} from "react";
+import type { CartItem } from "@/types";
+import { useEffect, useState } from "react";
 
-export function useCartStorage() {
-  // Lazy Initialization - useState(()=>{}) - React runs function only once
-  const [items, setItems] = useState<CartItem[]>(() => {
-    // Next.js may render on server first.
-    // localStorage exists only in browser, so prevent server crash.
-    if (typeof window === "undefined") {
+// One fixed key keeps this app's cart separate from other localStorage data.
+const CART_STORAGE_KEY = "app_cart";
+
+// Reads the saved guest cart safely from browser storage.
+function getStoredCart(): CartItem[] {
+  // localStorage is available only in the browser.
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  try {
+    const savedCart = window.localStorage.getItem(CART_STORAGE_KEY);
+
+    // No saved cart means customer starts with an empty cart.
+    if (!savedCart) {
       return [];
     }
 
-    // Try restoring previously saved cart from browser storage.
-    const saved = localStorage.getItem("app_cart");
+    const parsedCart: unknown = JSON.parse(savedCart);
 
-    // localStorage stores strings only.
-    // Convert JSON string → JS object, otherwise start with empty cart.
-    return saved ? JSON.parse(saved) : [];
-  });
+    // Only accept array-shaped saved data.
+    return Array.isArray(parsedCart) ? (parsedCart as CartItem[]) : [];
+  } catch {
+    // Broken or outdated storage should not crash the application.
+    window.localStorage.removeItem(CART_STORAGE_KEY);
 
-  // Keep browser storage synced whenever cart state changes.
+    return [];
+  }
+}
+
+export function useCartStorage() {
+  // Restore saved guest cart once when the provider first mounts.
+  const [items, setItems] = useState<CartItem[]>(getStoredCart);
+
+  // Keep browser storage synchronized with React cart state.
+  // Save after every cart change so items remain after page refresh.
   useEffect(() => {
-    localStorage.setItem("app_cart", JSON.stringify(items));
-  }, [items]); // Whenever items changes... React runs: localStorage.setItem()
+    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+  }, [items]);
 
   return {
     items,

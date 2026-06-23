@@ -14,10 +14,10 @@ export interface AuthContextType {
   // Indicates whether authentication data is still loading.
   loading: boolean;
 
-  // Reloads user information from the server.
+  // Reloads the current customer session through the shared API helper.
   refreshUser: () => Promise<void>;
 
-  // Ends the current user session.
+  // Ends the current customer session and clears local auth state.
   logout: () => Promise<void>;
 }
 

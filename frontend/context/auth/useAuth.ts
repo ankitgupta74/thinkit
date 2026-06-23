@@ -3,7 +3,7 @@
 // Authentication Flow:
 //
 // Browser Cookie
-// → /api/auth/me
+// → api("/auth/me")
 // → AuthProvider
 // → AuthContext
 // → useAuth()
