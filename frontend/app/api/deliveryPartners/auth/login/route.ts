@@ -8,7 +8,7 @@
 // → Save Cookie
 // → Rider Logged In
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
 import DeliveryPartner from "@/models/DeliveryPartner";
@@ -17,7 +17,7 @@ import { connectDB } from "@/lib/mongodb";
 import { generateToken } from "@/lib/jwt";
 
 // Authenticates a delivery partner.
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
@@ -51,6 +51,19 @@ export async function POST(request: Request) {
         },
         {
           status: 401,
+        },
+      );
+    }
+
+    // Check if the delivery partner account is active before allowing login.
+    if (!partner.isActive) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Your account has been deactivated",
+        },
+        {
+          status: 403,
         },
       );
     }

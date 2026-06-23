@@ -3,7 +3,7 @@
 // GET  → List delivery partners
 // POST → Create delivery partner
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongodb";
 import { getAdminUser } from "@/lib/admin";
@@ -71,7 +71,7 @@ export async function GET() {
 }
 
 // Creates a new delivery partner account.
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     await connectDB();
 

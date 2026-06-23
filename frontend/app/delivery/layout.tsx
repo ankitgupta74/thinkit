@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DeliveryPartner } from "@/types";
 import Loader from "@/components/ui/Loader";
+import { api } from "@/lib/api";
 
 export default function DeliveryLayout({
   children,
@@ -33,14 +34,10 @@ export default function DeliveryLayout({
     const fetchPartner = async () => {
       try {
         // Check whether a delivery partner is currently logged in.
-        const response = await fetch("/api/deliveryPartners/auth/me");
-
-        const data = await response.json();
-
-        if (!data.success) {
-          router.push("/delivery/login");
-          return;
-        }
+        const data = await api<{
+          success: boolean;
+          partner: DeliveryPartner;
+        }>("/deliveryPartners/auth/me");
 
         setPartner(data.partner);
       } catch (error) {
@@ -58,19 +55,29 @@ export default function DeliveryLayout({
 
   // End delivery partner session.
   const handleLogout = async () => {
-    // Remove delivery authentication cookie.
-    await fetch("/api/deliveryPartners/auth/logout", {
-      method: "POST",
-    });
+    try {
+      // Remove the delivery-token cookie.
+      await api<{
+        success: boolean;
+      }>("/deliveryPartners/auth/logout", {
+        method: "POST",
+      });
 
-    router.push("/");
+      // Return rider to delivery login after logout.
+      router.push("/delivery/login");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   // Don't render the layout until partner data is available
-  if (loading) return <Loader />;
-
-  // Do not render protected delivery pages without a valid partner.
-  if (!partner) return null;
+  if (loading || !partner) {
+    return (
+      <div className="min-h-screen flex-center flex-col gap-4">
+        <Loader />
+      </div>
+    );
+  }
 
   return (
     // Main wrapper that stays around all delivery pages

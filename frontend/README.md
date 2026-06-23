@@ -3623,3 +3623,156 @@ app/api/products/
 ├── [id]/route.ts
 └── flashDeals/route.ts
 ```
+
+## Delivery Partner Delivery Management
+
+Implemented the complete delivery partner order management workflow with secure rider authentication, assigned-order access, delivery status updates, OTP completion, cancellation reasons, active account validation, and live location sharing.
+
+### Steps Taken
+
+1. Created delivery partner authentication APIs for login, logout, and current partner profile.
+2. Stored delivery partner JWT tokens in HTTP-only `delivery-token` cookies.
+3. Added shared `getDeliveryPartner()` authentication helper for delivery APIs.
+4. Validated that the authenticated delivery partner account exists and is active.
+5. Added admin delivery partner management APIs for listing, creating, and updating partners.
+6. Added `isActive` update support so admins can activate or deactivate rider accounts.
+7. Prevented inactive delivery partners from logging in or using existing delivery sessions.
+8. Added rider-specific assigned order list API with active and completed delivery filters.
+9. Added single assigned order API that prevents riders from accessing another rider's delivery.
+10. Added controlled delivery status updates from `Assigned` to `Packed` and `Out for Delivery`.
+11. Added order status history entries for every delivery progress update.
+12. Added OTP-based delivery completion API that verifies the customer OTP before marking an order as delivered.
+13. Cleared the delivery OTP after successful completion.
+14. Added delivery cancellation API with mandatory cancellation reason and timeline history.
+15. Added live location update API for active rider deliveries.
+16. Validated latitude, longitude, active order status, and rider ownership before saving live location.
+17. Added a shared delivery layout that verifies the rider session before rendering delivery pages.
+18. Integrated delivery dashboard APIs for active and completed orders.
+19. Added frontend handlers for status updates, OTP completion, cancellation, and live location sharing.
+20. Added session-based location tracking preference with automatic 10-second location updates.
+
+### Progress
+
+- Delivery partner authentication completed.
+- Delivery partner active-account validation completed.
+- Admin delivery partner management completed.
+- Rider-specific order access completed.
+- Active and completed delivery filtering completed.
+- Delivery status progression completed.
+- Delivery status history tracking completed.
+- OTP-based order completion completed.
+- Delivery cancellation with reason tracking completed.
+- Live location update and sharing completed.
+- Delivery dashboard API integration completed.
+- Shared API response handling integrated across delivery actions.
+
+### Delivery Workflow
+
+```text
+Admin Creates Or Updates Rider
+→ Rider Account Must Be Active
+→ Rider Logs In
+→ delivery-token Cookie Is Created
+→ Rider Loads Assigned Orders
+→ Rider Updates Delivery Status
+→ Rider Shares Live Location
+→ Customer Provides OTP
+→ Rider Completes Or Cancels Delivery
+→ Order Timeline Is Updated
+```
+
+### Status Update Workflow
+
+```text
+Assigned
+→ Packed
+→ Out for Delivery
+→ Delivered
+```
+
+### Live Location Workflow
+
+```text
+Rider Enables Location Sharing
+→ Browser Gets Current Coordinates
+→ Validate Latitude And Longitude
+→ Verify Active Assigned Delivery
+→ Save Latest Location In Order
+→ Customer Tracking Receives Updated Location
+```
+
+### Concepts Covered
+
+- Delivery partner authentication
+- JWT cookie sessions
+- Active account authorization
+- Role-based admin access
+- Rider-specific data access
+- Order ownership validation
+- Delivery lifecycle management
+- Controlled status transitions
+- OTP verification
+- Cancellation reason tracking
+- Order status history
+- Live geolocation tracking
+- Session storage
+- Shared API response handling
+
+### Approach
+
+- Use one shared delivery authentication helper across all rider APIs.
+- Require an active rider account for login and authenticated delivery actions.
+- Restrict riders to orders assigned to their own account.
+- Allow only valid forward delivery status transitions.
+- Store every delivery event in order status history.
+- Verify customer OTP before completing a delivery.
+- Store cancellation reasons as timeline events.
+- Allow location updates only for active assigned deliveries.
+- Keep dashboard state synchronized by replacing only updated orders.
+- Use session storage to preserve the location sharing toggle during the browser session.
+
+### Techniques Used
+
+- Next.js Route Handlers
+- Mongoose queries and updates
+- JWT token generation and verification
+- HTTP-only cookies
+- bcrypt password verification and hashing
+- MongoDB document population
+- Conditional database queries
+- Status transition mapping
+- OTP validation
+- Browser Geolocation API
+- `setInterval()` location polling
+- `useRef()` request locking
+- `Promise.all()` for multi-order location updates
+- React state updates
+- Session storage
+- Toast notifications
+
+### Files Integrated
+
+```text
+app/api/deliveryPartners/
+├── route.ts
+├── [id]/route.ts
+├── auth/
+│   ├── login/route.ts
+│   ├── logout/route.ts
+│   └── me/route.ts
+└── order/
+    ├── route.ts
+    └── [id]/
+        ├── route.ts
+        ├── status/route.ts
+        ├── complete/route.ts
+        ├── cancel/route.ts
+        └── location/route.ts
+
+app/delivery/
+├── layout.tsx
+└── page.tsx
+
+lib/
+└── deliveryAuth.ts
+```

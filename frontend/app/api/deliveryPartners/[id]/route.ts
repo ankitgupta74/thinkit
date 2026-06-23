@@ -1,13 +1,13 @@
 // Admin endpoint for updating delivery partner information.
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import DeliveryPartner from "@/models/DeliveryPartner";
 import { getAdminUser } from "@/lib/admin";
 
 // Updates an existing delivery partner account.
 export async function PUT(
-  request: Request,
+  request: NextRequest,
   context: {
     params: Promise<{
       id: string;

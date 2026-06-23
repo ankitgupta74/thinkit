@@ -42,7 +42,13 @@ export async function getDeliveryPartner() {
     // Load rider information from the database.
     const partner = await DeliveryPartner.findById(decoded.id).lean();
 
-    // Return authenticated delivery partner.
+    // Token may be valid, but the rider account may no longer exist or may have been deactivated by an admin.
+    // A valid token is not enough: the rider must still exist and be active.
+    if (!partner || !partner.isActive) {
+      return null;
+    }
+
+    // Return only an existing and active delivery partner.
     return partner;
   } catch {
     // Invalid or expired token.
