@@ -133,7 +133,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Continue only when Stripe confirms that Checkout completed successfully.
-    if (event.type === "checkout.session.completed") {
+    // Ignore event types this endpoint does not process.
+    if (event.type !== "checkout.session.completed") {
       console.log("Ignoring Stripe event:", event.type);
 
       return NextResponse.json({
@@ -141,8 +142,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // checkout.session.completed reaches the existing success workflow below.
-    // From here onward, this is a successful Checkout session.
+    // From here onward, Stripe has confirmed a successful Checkout payment.
     const session = event.data.object as Stripe.Checkout.Session;
 
     // Stripe Checkout Session contains the order id stored in metadata.
