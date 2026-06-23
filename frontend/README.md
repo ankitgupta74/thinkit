@@ -3538,3 +3538,88 @@ implement admin delivery partner management and order assignment system
 - Client-Side Data Fetching
 - Async/Await
 - Toast Notifications
+
+## Dynamic Product Discount Calculation
+
+Implemented a shared discount calculation system for product API responses.
+
+### Steps Taken
+
+1. Created a reusable `calculateDiscount()` helper in `utils/productHelpers.ts`.
+2. Validated selling price and original price before calculating a discount.
+3. Returned `0` when the original price is missing, invalid, or not greater than the selling price.
+4. Calculated and rounded the discount percentage from current product prices.
+5. Integrated the helper into the product list API.
+6. Integrated the helper into the single product details API.
+7. Integrated the helper into the flash deals API.
+8. Filtered flash deals so only products with a real discount are returned.
+
+### Progress
+
+- Shared discount calculation helper completed.
+- Product list API returns calculated discount percentages.
+- Product details API returns calculated discount percentages.
+- Flash deals API returns only discounted in-stock products.
+- Discount values are calculated dynamically without storing a separate database field.
+
+### API Workflow
+
+#### Product List and Product Details
+
+```text
+Client Request
+→ Fetch Product Data From Database
+→ Read Price And Original Price
+→ Calculate Discount Percentage
+→ Attach Discount To Product Response
+→ Return Product Data
+```
+
+#### Flash Deals
+
+```text
+Client Request
+→ Fetch In-Stock Products
+→ Calculate Discount For Each Product
+→ Keep Products With Discount Above 0
+→ Return Flash Deal Products
+```
+
+### Concepts Covered
+
+- Dynamic calculated fields
+- Reusable utility functions
+- Price comparison
+- Percentage calculation
+- API response transformation
+- Flash deal filtering
+- Single source of truth
+
+### Approach
+
+- Keep discount logic in one reusable helper function.
+- Calculate discount from current product prices at API response time.
+- Avoid storing duplicate discount values in MongoDB.
+- Reuse the same calculation across all product-related APIs.
+- Return only genuine discounted products in flash deals.
+
+### Techniques Used
+
+- TypeScript utility function
+- `Number.isFinite()` validation
+- Conditional guards for invalid price values
+- `Math.round()` for clean percentage values
+- Array `map()` for API response transformation
+- Array `filter()` for flash deal selection
+
+### Files Updated
+
+```text
+utils/
+└── productHelpers.ts
+
+app/api/products/
+├── route.ts
+├── [id]/route.ts
+└── flashDeals/route.ts
+```

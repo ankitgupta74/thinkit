@@ -4,9 +4,10 @@ import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
 import { serverError } from "@/lib/apiError";
 import { getAdminUser } from "@/lib/admin";
+import { calculateDiscount } from "@/utils/productHelpers";
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
@@ -46,18 +47,14 @@ export async function GET(
     }
 
     // Calculate discount dynamically from current prices
-    const discount =
-      product.originalPrice && product.price
-        ? Math.round(
-            ((product.originalPrice - product.price) / product.originalPrice) *
-              100,
-          )
-        : 0;
+    // Build discount from the current saved prices before sending this product.
+    const discount = calculateDiscount(product.price, product.originalPrice);
 
     // Send product details back to the frontend
     return NextResponse.json({
       success: true,
       product: {
+        // Keep database product data, then add the calculated field for the frontend.
         ...product.toObject(),
         discount,
       },
@@ -225,7 +222,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
@@ -277,7 +274,16 @@ export async function DELETE(
     }
 
     // Permanently remove the product from the database
-    await Product.findByIdAndDelete(id);
+    await Product.findByIdAndUpdate(
+      id,
+      {
+        // if we delete the product directly from database, then it will show error to those who ordered them. So, make the stock to 0.
+        stock: 0,
+      },
+      {
+        returnDocument: "after",
+      },
+    );
 
     // Inform the frontend that deletion completed successfully
     return NextResponse.json({

@@ -12,7 +12,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 10,
   },
   {
     name: "Organic Quinoa 500g",
@@ -27,7 +26,6 @@ export const products = [
     isOrganic: true,
     rating: 4.5,
     reviewCount: 12,
-    discount: 7,
   },
   {
     name: "Brown Bread 400g",
@@ -42,7 +40,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 13,
   },
   {
     name: "Barley 1kg",
@@ -57,7 +54,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 7,
   },
   {
     name: "Knorr Cup Soup 70g",
@@ -72,7 +68,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 14,
   },
   {
     name: "Maggi Noodles 280g",
@@ -87,7 +82,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 9,
   },
   {
     name: "Sprite 1.5L",
@@ -102,7 +96,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 20,
   },
   {
     name: "Carrot 500g",
@@ -118,7 +111,6 @@ export const products = [
     isOrganic: true,
     rating: 4.5,
     reviewCount: 12,
-    discount: 12,
   },
   {
     name: "Coca-Cola 1.5L",
@@ -133,7 +125,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 6,
   },
   {
     name: "Brown Rice 1kg",
@@ -148,7 +139,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 8,
   },
   {
     name: "Eggs 12 pcs",
@@ -163,7 +153,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 6,
   },
   {
     name: "Banana 1 kg",
@@ -179,7 +168,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 10,
   },
   {
     name: "Basmati Rice 5kg",
@@ -194,7 +182,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 5,
   },
   {
     name: "Onion 500g",
@@ -209,7 +196,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 10,
   },
   {
     name: "7 Up 1.5L",
@@ -224,7 +210,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 8,
   },
   {
     name: "Spinach 500g",
@@ -239,7 +224,6 @@ export const products = [
     isOrganic: true,
     rating: 4.5,
     reviewCount: 12,
-    discount: 17,
   },
   {
     name: "Orange 1 kg",
@@ -255,7 +239,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 6,
   },
   {
     name: "Wheat Flour 5kg",
@@ -270,7 +253,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 8,
   },
   {
     name: "Grapes 500g",
@@ -286,7 +268,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 7,
   },
   {
     name: "Fanta 1.5L",
@@ -301,7 +282,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 7,
   },
   {
     name: "Paneer 200g",
@@ -317,7 +297,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 6,
   },
   {
     name: "Mango 1 kg",
@@ -333,7 +312,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 7,
   },
   {
     name: "Tomato 1 kg",
@@ -349,7 +327,6 @@ export const products = [
     isOrganic: true,
     rating: 4.5,
     reviewCount: 12,
-    discount: 7,
   },
   {
     name: "Potato 500g",
@@ -365,7 +342,6 @@ export const products = [
     isOrganic: true,
     rating: 4.5,
     reviewCount: 12,
-    discount: 13,
   },
   {
     name: "Cheese 200g",
@@ -381,7 +357,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 7,
   },
   {
     name: "Amul Milk 1L",
@@ -396,7 +371,6 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 8,
   },
   {
     name: "Apple 1 kg",
@@ -411,6 +385,5 @@ export const products = [
     isOrganic: false,
     rating: 4.5,
     reviewCount: 12,
-    discount: 10,
   },
 ];

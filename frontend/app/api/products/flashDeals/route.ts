@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Product from "@/models/Product";
 import { connectDB } from "@/lib/mongodb";
 import { serverError } from "@/lib/apiError";
+import { calculateDiscount } from "@/utils/productHelpers";
 
 export async function GET() {
   try {
@@ -18,24 +19,21 @@ export async function GET() {
 
     // Calculate discount percentage for each product
     const productsWithDiscount = products
+      // Add a calculated discount to every product before deciding if it is a deal.
       .map((product) => {
         // Convert price difference into a percentage discount
-        const discount =
-          product.originalPrice && product.price
-            ? Math.round(
-                ((product.originalPrice - product.price) /
-                  product.originalPrice) *
-                  100,
-              )
-            : 0;
+        const discount = calculateDiscount(
+          product.price,
+          product.originalPrice,
+        );
 
         return {
           ...product.toObject(),
           discount,
         };
       })
+      // A flash deal must have a real price reduction.
       .filter((product) => product.discount > 0);
-    // Keep only products that actually have a discount
 
     // Send flash deal products to the frontend
     return NextResponse.json({

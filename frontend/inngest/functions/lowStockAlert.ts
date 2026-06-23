@@ -41,9 +41,6 @@ export const lowStockAlert = inngest.createFunction(
       };
     }
 
-    console.log("PRODUCT FOUND:");
-    console.log(product);
-
     // No alert needed if inventory is still at a safe level.
     if (product.stock > 10) {
       console.log("STOCK IS HEALTHY");

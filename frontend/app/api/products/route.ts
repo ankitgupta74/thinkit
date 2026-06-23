@@ -2,6 +2,7 @@ import { getAdminUser } from "@/lib/admin";
 import { serverError } from "@/lib/apiError";
 import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
+import { calculateDiscount } from "@/utils/productHelpers";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -71,18 +72,14 @@ export async function GET(request: NextRequest) {
     const products = await Product.find(query).sort(sortOption).lean();
 
     // Calculate discount dynamically instead of storing it manually
+    // Add the latest discount to each product response without storing it in MongoDB.
     const productsWithDiscount = products.map((product) => {
-      const discount =
-        product.originalPrice && product.price
-          ? Math.round(
-              ((product.originalPrice - product.price) /
-                product.originalPrice) *
-                100,
-            )
-          : 0;
+      // Build discount from the current saved prices before sending this product.
+      const discount = calculateDiscount(product.price, product.originalPrice);
 
       return {
         ...product,
+        // Frontend receives this ready-to-display percentage with the product.
         discount,
       };
     });
