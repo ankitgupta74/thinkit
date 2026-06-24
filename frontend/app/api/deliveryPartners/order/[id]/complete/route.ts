@@ -101,6 +101,9 @@ export async function PUT(
       {
         status: "Delivered",
         statusHistory: history,
+        // A COD order is paid when the rider successfully collects cash at delivery.
+        // Card orders were already marked paid by the Stripe webhook.
+        isPaid: true,
         // Clear the OTP after use so it cannot be reused later.
         deliveryOtp: "",
       },
