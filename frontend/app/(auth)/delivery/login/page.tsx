@@ -94,7 +94,7 @@ export default function DeliveryLogin() {
             <div className="flex-center gap-2 mb-4">
               <BikeIcon className="size-7 text-app-green" />
               <span className="text-2xl font-semibold text-app-green">
-                Instacart
+                Thinkit
               </span>
             </div>
             <h1 className="text-2xl font-semibold text-app-green mb-2">

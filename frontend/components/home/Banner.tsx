@@ -38,7 +38,7 @@ function Banner() {
               <TruckIcon className="size-4 shrink-0"/>
 
               <span className="font-medium">
-                Free delivery on orders above $20
+                Free delivery on orders above ₹49
               </span>
             </div>
             <span className="hidden sm:inline text-white/40">|</span>
