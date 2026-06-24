@@ -26,7 +26,7 @@ function CartSidebar() {
 
   if (!isCartOpen) return null;
 
-  const deliveryFee = cartTotal > 149 ? 0 : 99;
+  const deliveryFee = cartTotal > 149 ? 0 : 49;
   const grandTotal = cartTotal + deliveryFee;
 
   return (
