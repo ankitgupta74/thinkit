@@ -1,4 +1,5 @@
-import { Order, StatusHistory } from "@/types";
+import { Order } from "@/types";
+import { StatusHistory } from "@/types/statusHistory";
 import { ClockIcon, CheckIcon, TruckIcon, PackageIcon } from "lucide-react";
 
 export default function OrderTimeLine({ order }: { order: Order }) {

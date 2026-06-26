@@ -14,8 +14,9 @@ import { MapPinIcon } from "lucide-react";
 import L from "leaflet";
 import { useEffect, useMemo, useRef } from "react";
 
-import { LiveLocation, Order } from "@/types";
+import { Order } from "@/types";
 import { iconsForLeafpad } from "@/public/assets";
+import { LiveLocation } from "@/types/liveLocation";
 
 function MapUpdater({ center }: { center: [number, number] }) {
   const map = useMap();

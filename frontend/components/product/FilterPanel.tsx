@@ -1,4 +1,4 @@
-import { FilterKey } from "@/utils/productHelpers";
+import { FilterKey } from "@/utils/productCategoryKey";
 import { useState } from "react";
 
 interface Category {

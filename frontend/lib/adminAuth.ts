@@ -1,4 +1,4 @@
-import { getAuthUser } from "./auth";
+import { getAuthUser } from "./userAuth";
 
 // Checks whether an email belongs to an admin.
 // Useful when admin access is controlled through environment variables.

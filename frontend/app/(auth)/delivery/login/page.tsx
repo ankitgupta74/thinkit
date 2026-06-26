@@ -1,65 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import { BikeIcon } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
-import { api } from "@/lib/api";
+import { useDeliveryLogin } from "@/hooks/useDeliveryLogin";
 
 export default function DeliveryLogin() {
-  // Stores the email entered by the delivery partner
-  const [email, setEmail] = useState("");
-
-  // Stores the password entered by the delivery partner
-  const [password, setPassword] = useState("");
-
-  // Used to show loading state during login request
-  const [loading, setLoading] = useState(false);
-
-  const router = useRouter();
-
-  // Login Flow:
-  //
-  // Submit Credentials
-  // → Call Login API
-  // → Receive Auth Cookie
-  // → Redirect To Delivery Dashboard
-  const handleSubmit = async (e: React.SubmitEvent) => {
-    e.preventDefault();
-
-    try {
-      setLoading(true);
-
-      // Ask backend to verify rider credentials.
-      // Shared helper sends JSON, includes cookies, and throws backend errors.
-      await api<{
-        success: boolean;
-        partner: {
-          _id: string;
-          name: string;
-          email: string;
-        };
-      }>("/deliveryPartners/auth/login", {
-        method: "POST",
-        body: {
-          email,
-          password,
-        },
-      });
-
-      toast.success("Welcome back");
-
-      // Login succeeded, move rider into the delivery workspace.
-      router.push("/delivery");
-    } catch (error) {
-      console.error(error);
-      toast.error(error instanceof Error ? error.message : "Login failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  const { email, setEmail, password, setPassword, loading, handleSubmit } =
+    useDeliveryLogin();
+  
   return (
     // Split screen layout: branding section on large screens, login form section on the other side
     <div className="min-h-screen flex">

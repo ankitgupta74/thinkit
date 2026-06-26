@@ -8,69 +8,20 @@
 "use client";
 
 import Loader from "@/components/ui/Loader";
-import { api } from "@/lib/api";
 import { statusColors } from "@/public/assets";
-import { Order } from "@/types";
 import { CURRENCY } from "@/utils/config";
-import {
-  CalendarIcon,
-  ChevronRightIcon,
-  PackageIcon
-} from "lucide-react";
+import { CalendarIcon, ChevronRightIcon, PackageIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { useOrderHistory } from "@/hooks/useOrderHistory";
 
 // Customer order history page.
 function Orders() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("all");
+  const { loading, activeTab, setActiveTab, filteredOrders } =
+    useOrderHistory();
 
   // Quick order status filters.
   const tabs = ["all", "Active", "Delivered"];
-
-  // Build visible order list based on selected tab.
-  const filteredOrders =
-    activeTab === "all"
-      ? orders
-      : activeTab === "Active"
-        ? orders.filter(
-            (o) => o.status !== "Delivered" && o.status !== "Cancelled",
-          )
-        : orders.filter((o) => o.status === activeTab);
-
-  // Load customer's order history.
-  useEffect(() => {
-    const loadOrders = async () => {
-      try {
-        setLoading(true);
-
-        // Fetch orders belonging to the logged-in user.
-        // Fetch orders belonging to the logged-in user.
-        const data = await api<{
-          success: boolean;
-          orders: Order[];
-        }>("/orders");
-
-        // Store orders for filtering and display.
-        setOrders(data.orders);
-      } catch (error) {
-        console.error(error);
-
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Unable to load your orders. Please try again.";
-
-        toast.error(message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadOrders();
-  }, []);
 
   return (
     <div className="min-h-screen bg-app-cream mb-20">

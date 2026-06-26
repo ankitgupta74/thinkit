@@ -1,13 +1,5 @@
-// Dashboard Flow:
-//
-// Fetch Dashboard Data
-// → Build Summary Cards
-// → Show Recent Orders
-// → Navigate To Management Pages
-
 "use client";
 
-import { useState, useEffect } from "react";
 import {
   PackageIcon,
   UsersIcon,
@@ -18,68 +10,10 @@ import Link from "next/link";
 import { CURRENCY } from "@/utils/config";
 import Loader from "@/components/ui/Loader";
 import { statusColors } from "@/public/assets";
-import { api } from "@/lib/api";
-import toast from "react-hot-toast";
-
-interface RecentOrder {
-  _id: string;
-  total: number;
-  status: string;
-  createdAt: string;
-  user?: {
-    name: string;
-    email: string;
-  };
-  items?: {
-    _id: string;
-  }[];
-}
-
-// Defines the shape of dashboard data so TypeScript knows what to expect
-interface Stats {
-  totalOrders: number;
-  totalUsers: number;
-  totalProducts: number;
-  outOfStock: number;
-  totalPartners: number;
-  recentOrders: RecentOrder[];
-}
+import { useAdminDashboard } from "@/hooks/useAdminDashboard";
 
 export default function AdminDashboard() {
-  // Stores all dashboard statistics and recent orders
-  const [stats, setStats] = useState<Stats | null>(null);
-
-  // Controls loading screen while dashboard data is loading
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Load dashboard statistics and recent activity.
-    const fetchDashboard = async () => {
-      try {
-        // Fetch admin dashboard data from backend.
-        const data = await api<Stats & { success: boolean }>(
-          "/admin/dashboard",
-        );
-
-        // Store dashboard data for cards and tables.
-        setStats(data);
-      } catch (error) {
-        console.error(error);
-
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Unable to load dashboard. Please try again.";
-
-        toast.error(message);
-
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboard();
-  }, []);
+  const { stats, loading } = useAdminDashboard();
 
   // Build dashboard cards from data.
   // Makes the UI easier to maintain and expand.

@@ -17,7 +17,8 @@ import {
 import type { User } from "@/types/user";
 import { AuthContext } from "./authContext";
 import { api } from "@/lib/api";
-import toast from "react-hot-toast";
+import { refreshUser as refreshUserAction } from "./functions/refreshUser";
+import { logout as logoutAction } from "./functions/logout";
 
 // Components wrapped inside AuthProvider can access authentication state.
 interface Props {
@@ -31,6 +32,10 @@ export default function AuthProvider({ children }: Props) {
 
   // Prevents UI from rendering auth-dependent content before authentication is checked.
   const [loading, setLoading] = useState(true);
+
+  // Create local wrapper functions to pass down into the context
+  const refreshUser = async () => refreshUserAction(setUser, setLoading);
+  const logout = async () => logoutAction(setUser, setLoading);
 
   // Check whether the user is already logged in when the application starts.
   useEffect(() => {
@@ -54,49 +59,6 @@ export default function AuthProvider({ children }: Props) {
 
     loadUser();
   }, []); // no deps now, so no warning
-
-  // Manually reload authentication state.
-  // Useful after login, profile updates or logout.
-    const refreshUser = async () => {
-      // Show loading state while refreshing session data.
-      setLoading(true);
-
-      try {
-        // Reload the current customer from the server session.
-        const data = await api<{
-          success: boolean;
-          user: User;
-        }>("/auth/me");
-
-        setUser(data.user);
-      } catch {
-        // The session no longer exists or is no longer valid.
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-  // Clear server session and refresh local auth state.
-    const logout = async () => {
-      try {
-        // Ask backend to remove the customer authentication cookie.
-        await api<{
-          success: boolean;
-        }>("/auth/logout", {
-          method: "POST",
-        });
-
-        toast("Logged Out Successfully");
-      } catch (error) {
-        // Even if the server session is already gone, clear local auth state.
-        console.error(error);
-      } finally {
-        // Remove customer data immediately from the frontend session.
-        setUser(null);
-        setLoading(false);
-      }
-    };
 
   return (
     // Make authentication state available to all child components.

@@ -8,7 +8,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import {
   PlusIcon,
   PackageSearchIcon,
@@ -19,9 +18,8 @@ import {
   Truck,
 } from "lucide-react";
 import Navbar from "@/components/navigation/Navbar";
-import { useEffect } from "react";
-import { useAuth } from "@/context/auth/useAuth";
 import Loader from "@/components/ui/Loader";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 export default function AdminLayout({
   children,
@@ -64,27 +62,7 @@ export default function AdminLayout({
     },
   ];
 
-  const router = useRouter();
-
-  // Get current logged-in user from global auth state.
-  const { user, loading } = useAuth();
-
-  // Protect admin routes from guests and non-admin users.
-  useEffect(() => {
-    // Guest users must login first.
-    if (!loading && !user) {
-      router.replace("/login");
-    }
-
-    // Logged-in users without admin rights cannot access admin pages.
-    if (!loading && user && !user.isAdmin) {
-      router.replace("/");
-    }
-  }, [loading, user, router]);
-
-  // Gives the current URL path.
-  // Used to highlight the active sidebar link.
-  const pathname = usePathname();
+  const { user, loading, pathname } = useAdminAuth();
 
   // Wait until authentication check finishes.
   if (loading || !user || !user.isAdmin) {

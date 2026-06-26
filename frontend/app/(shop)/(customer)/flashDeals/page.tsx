@@ -4,20 +4,16 @@ import ProductCard from "@/components/product/ProductCard";
 import Loader from "@/components/ui/Loader";
 import Pagination from "@/components/ui/Pagination";
 import usePagination from "@/hooks/usePagination";
-import { Product } from "@/types";
 import { Zap } from "lucide-react";
 import {
   Suspense,
-  useEffect,
-  useState
 } from "react";
 import {
   useSearchParams,
   useRouter,
   usePathname
 } from "next/navigation";
-import { api } from "@/lib/api";
-import toast from "react-hot-toast";
+import { useFlashDeals } from "@/hooks/useFlashDeals";
 
 function FlashDealsContent() {
   // URL can store page/filter info.
@@ -32,11 +28,7 @@ function FlashDealsContent() {
   // Fallback to page 1 if nothing exists.
   const page = Number(searchParams.get("page")) || 1;
 
-  const [loading, setLoading] = useState(true);
-
-  const [products, setProducts] = useState<Product[]>([]);
-
-  const [error, setError] = useState("");
+  const { products, loading, error } = useFlashDeals();
 
   // If data can be calculated, avoid extra state.
   // useMemo prevents unnecessary recalculation.
@@ -48,44 +40,6 @@ function FlashDealsContent() {
     page,
     itemsPerPage: 10,
   });
-
-  // Load flash deals from backend when this page opens.
-  useEffect(() => {
-    // Load latest products from backend and extract active flash deals.
-    const loadDeals = async () => {
-      try {
-        setLoading(true);
-
-        // Fetch product catalog from API.
-        // Load flash-deal products through the shared API helper.
-        // Shared helper adds the /api prefix and handles failed responses consistently.
-        const data = await api<{
-          success: boolean;
-          products: Product[];
-        }>("/products/flashDeals");
-
-        // Only show discounted products that are still available.
-        // Backend already returns only active flash-deal products.
-        setProducts(data.products);
-      } catch (error: unknown) {
-        // api() throws the backend message, which we show through the toast.
-        console.error(error);
-
-        setError("Failed to load deals");
-
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Unable to load flash deals. Please try again.";
-
-        toast.error(message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadDeals();
-  }, []);
 
   // Update page in URL.
   // Same pattern can work for filters/sorting too.

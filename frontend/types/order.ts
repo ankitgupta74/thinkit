@@ -1,41 +1,10 @@
 import { Address } from "./address";
 import { DeliveryPartner } from "./delivery";
 import { ORDER_STATUSES } from "@/lib/orderStatus";
-
-export interface OrderItem {
-  _id: string;
-
-  product: string;
-
-  name: string;
-  image: string;
-
-  price: number;
-  quantity: number;
-
-  unit: string;
-}
-
-export interface OrderUser {
-  _id: string;
-  name: string;
-  email: string;
-  phone?: string;
-}
-
-export interface StatusHistory {
-  _id: string;
-
-  status: (typeof ORDER_STATUSES)[number];
-  timestamp: string;
-  note: string;
-}
-
-export interface LiveLocation {
-  lat: number;
-  lng: number;
-  updatedAt: string;
-}
+import { OrderItem } from "./orderItem";
+import { OrderUser } from "./orderUser";
+import { LiveLocation } from "./liveLocation";
+import { StatusHistory } from "./statusHistory";
 
 export interface Order {
   _id: string;

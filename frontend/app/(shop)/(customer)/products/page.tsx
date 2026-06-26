@@ -1,11 +1,3 @@
-// Data Flow:
-//
-// URL Filters
-// → useProducts()
-// → Products API
-// → Filter / Sort / Paginate
-// → Render Product Grid
-
 "use client";
 
 import FilterPanel from "@/components/product/FilterPanel";
@@ -15,7 +7,9 @@ import Pagination from "@/components/ui/Pagination";
 import useBodyScrollLock from "@/hooks/useBodyScrollLock";
 import useProducts from "@/hooks/useProduct";
 import { categoriesData } from "@/public/assets";
-import { buildUpdatedParams, FilterKey } from "@/utils/productHelpers";
+import { FilterKey } from "@/utils/productCategoryKey";
+import { useProductFilters } from "@/hooks/useProductFilters";
+
 import {
   ChevronDown,
   HomeIcon,
@@ -24,102 +18,51 @@ import {
   XIcon,
 } from "lucide-react";
 import Link from "next/link";
-import {
-  useSearchParams, // read query params
-  useRouter, // navigate/update URL
-  usePathname, // get current route
-} from "next/navigation";
-import {
-  Suspense,
-  useMemo,
-  useState
-} from "react";
+import { Suspense, useMemo, useState } from "react";
 
 // Page responsibility:
 // Read URL state → coordinate hooks → render UI.
 // Heavy business logic stays outside in hooks/helpers.
 function ProductsContent() {
-  // Reads URL values like ?category=fruits
-  // URL acts as global state.
-  // Filters become shareable, bookmarkable and persistent.
-  const searchParams = useSearchParams();
-
-  // Used to change route programmatically
-  const router = useRouter();
-
-  // Current page path (/products)
-  const pathname = usePathname();
-
   // Controls mobile filter sidebar
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   // Reusable modal pattern: lock page scroll while overlay is open
   useBodyScrollLock(mobileFilterOpen);
 
-  // Read filters from URL
-  // Single source of truth: UI state always comes from query params
-  const category = searchParams.get("category") || "";
+  const { filters, hasFilters, updateFilter, clearFilters } =
+    useProductFilters();
 
-  const organic = searchParams.get("organic") || "";
+  const { category, organic, sort, minPrice, maxPrice, page } = filters;
 
-  const sort = searchParams.get("sort") || "default";
+  // Find currently selected category
+  // Derived UI state: calculate display label from selected slug
+  const activeCategory = useMemo(
+    () => categoriesData.find((c) => c.slug === category),
+    [category],
+  );
 
-  const minPrice = searchParams.get("minPrice") || "";
-
-  const maxPrice = searchParams.get("maxPrice") || "";
-
-  // Current pagination page
-  const page = Number(searchParams.get("page")) || 1;
+  // Product transformation pipeline lives in custom hook: filtering → sorting → pagination
+  // Custom hook handles product fetching and transformation logic.
+  const { products, totalProducts, totalPages, loading, error } = useProducts({
+    ...filters,
+    itemsPerPage: 12,
+  });
 
   // Update a single filter in URL
   // Generic updater: same function works for category, sort, pagination, etc.
-  const updateFilter = (key: FilterKey, value: string) => {
-    const params = buildUpdatedParams(searchParams, key, value);
-
-    // Push updated URL
-    // Update URL without a full page refresh.
-    router.replace(`${pathname}?${params.toString()}`, {
-      scroll: false,
-    });
-
-    // auto-close drawer after selecting filters
+  // Modify the update/clear wrappers to auto-close the mobile menu
+  const handleUpdateFilter = (key: FilterKey, value: string) => {
+    updateFilter(key, value);
     setMobileFilterOpen(false);
   };
 
   // Clears every filter from URL. Example: "/products?category=snacks&minPrice=50" becomes: "/products"
   // Create a fresh empty query object... Empty query = no filters applied
   // Reset product listing back to default state.
-  const clearFilters = () => {
-    const params = new URLSearchParams();
-
-    // Navigate with no search params
-    router.replace(`${pathname}?${params.toString()}`, {
-      scroll: false,
-    });
+  const handleClearFilters = () => {
+    clearFilters();
     setMobileFilterOpen(false);
   };
-
-  // Find currently selected category
-  // Derived UI state: calculate display label from selected slug
-  const activeCategory =
-    // Memoize lookup.
-    // Recompute only when category changes.
-    useMemo(() => categoriesData.find((c) => c.slug === category), [category]);
-
-  // Check if any filter exists
-  // Used for conditional UI: show reset actions only when needed
-  const hasFilters = !!(category || organic || minPrice || maxPrice);
-
-  // Product transformation pipeline lives in custom hook: filtering → sorting → pagination
-  // Custom hook handles product fetching and transformation logic.
-  const { products, totalProducts, totalPages, loading, error } = useProducts({
-    category,
-    organic,
-    sort,
-    page,
-    minPrice,
-    maxPrice,
-    itemsPerPage: 12,
-  });
 
   return (
     <div className="min-h-screen bg-app-cream">
@@ -144,8 +87,8 @@ function ProductsContent() {
                 organic={organic}
                 minPrice={minPrice}
                 maxPrice={maxPrice}
-                updateFilter={updateFilter}
-                clearFilters={clearFilters}
+                updateFilter={handleUpdateFilter}
+                clearFilters={handleClearFilters}
                 hasFilters={hasFilters}
               />
             </div>
@@ -284,8 +227,8 @@ function ProductsContent() {
                   organic={organic}
                   minPrice={minPrice}
                   maxPrice={maxPrice}
-                  updateFilter={updateFilter}
-                  clearFilters={clearFilters}
+                  updateFilter={handleUpdateFilter}
+                  clearFilters={handleClearFilters}
                   hasFilters={hasFilters}
                 />
               </div>
