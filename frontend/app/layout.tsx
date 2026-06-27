@@ -14,6 +14,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/cart/CartProvider";
 import AuthProvider from "@/context/auth/AuthProvider";
+import { WishlistProvider } from "@/context/wishlist/WishlistProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,8 +50,10 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         {/* Makes authentication state available to every page and component. */}
         <AuthProvider>
-          {/* Makes cart state available throughout the store. */}
-          <CartProvider>{children}</CartProvider>
+          <WishlistProvider>
+            {/* Makes cart state available throughout the store. */}
+            <CartProvider>{children}</CartProvider>
+          </WishlistProvider>
         </AuthProvider>
         {/* Global notification system used for success, error and informational messages. */}
         <Toaster
