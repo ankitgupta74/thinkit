@@ -9,7 +9,7 @@ interface WishlistProviderProps {
   children: ReactNode;
 }
 
-// Provides cart state and cart actions to the full application.
+// Provides wishlist state and actions to the full application.
 export function WishlistProvider({ children }: WishlistProviderProps) {
   const wishlist = useWishlistHook();
 

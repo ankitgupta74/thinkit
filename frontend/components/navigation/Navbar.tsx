@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   ArrowUpRightIcon,
   ChevronDownIcon,
+  HeartIcon,
   LogOutIcon,
   MapPinIcon,
   MenuIcon,
@@ -188,6 +189,11 @@ function Navbar() {
                       {!user && (
                         <Link href="/login" className="dropdown-link">
                           <UserIcon size={16} /> Sign In
+                        </Link>
+                      )}
+                      {user && (
+                        <Link href="/wishlist" className="dropdown-link">
+                          <HeartIcon size={16} /> Wishlist
                         </Link>
                       )}
                       {user && (

@@ -1,6 +1,5 @@
 "use client";
 
-import { useCart } from "@/context/cart/useCart";
 import DummyReviewsSection from "@/components/ui/DummyReviewsSection";
 import type { Product } from "@/types";
 import { CURRENCY } from "@/utils/config";
@@ -13,6 +12,7 @@ import {
   PlusIcon,
   ShoppingCartIcon,
   StarIcon,
+  HeartIcon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -20,7 +20,9 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import ProductCard from "@/components/product/ProductCard";
 import Loader from "@/components/ui/Loader";
+import { useCart } from "@/context/cart/useCart";
 import { useProductDetails } from "@/hooks/useProductDetails";
+import { useWishlist } from "@/context/wishlist/useWishlist";
 
 function Product() {
   const router = useRouter();
@@ -32,8 +34,11 @@ function Product() {
   // Used before product enters cart.
   // After adding to cart, cart becomes the main source of truth.
   const [localQuantity, setLocalQuantity] = useState(1);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   const { product, relatedProducts, loading } = useProductDetails(id);
+
+  const { isWishlisted, toggleWishlist } = useWishlist();
 
   // Safety check.
   // Prevent page crash if product id is missing or invalid.
@@ -44,6 +49,17 @@ function Product() {
   if (!product) {
     return <Loader />;
   }
+
+  const wishlisted = isWishlisted(product._id);
+  const handleWishlistToggle = async () => {
+    setWishlistLoading(true);
+
+    try {
+      await toggleWishlist(product._id);
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
 
   // Check if this product already exists inside cart
   const cartItem = items.find((item) => item.product._id === product._id);
@@ -219,6 +235,21 @@ function Product() {
                     <PlusIcon className="w-4 h-4" />
                   </button>
                 </div>
+                <button
+                  type="button"
+                  disabled={wishlistLoading}
+                  onClick={handleWishlistToggle}
+                  aria-label={
+                    wishlisted ? "Remove from wishlist" : "Add to wishlist"
+                  }
+                  className="flex-center size-12 shrink-0 rounded-xl border border-app-border bg-white hover:bg-app-cream transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <HeartIcon
+                    className={`w-5 h-5 transition-colors ${
+                      wishlisted ? "fill-red-500 text-red-500" : "text-gray-400"
+                    } ${wishlistLoading ? "animate-pulse" : ""}`}
+                  />
+                </button>
                 {/* Add to Cart */}
                 <button
                   type="button"

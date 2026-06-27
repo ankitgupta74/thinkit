@@ -2,26 +2,23 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Plus, Star, Heart } from "lucide-react";
+import { ShoppingCart, Star, Trash2Icon } from "lucide-react";
 import { CURRENCY } from "@/utils/config";
-import { Product } from "@/types";
-import { useWishlist } from "@/context/wishlist/useWishlist";
-import { useCart } from "@/context/cart/useCart";
+import { Product, WishlistItem } from "@/types";
 
-interface Props {
-  product: Product;
-  priority?: boolean;
+interface WishlistCardProps {
+  item: WishlistItem & {
+    product: Product;
+  };
+
+  onMoveToCart: () => Promise<void>;
+
+  onRemove: () => Promise<void>;
 }
 
-function ProductCard({ product, priority = false }: Props) {
+function WishlistCard({ item, onMoveToCart, onRemove }: WishlistCardProps) {
   const router = useRouter();
-
-  const { addToCart } = useCart();
-
-  const { isWishlisted, toggleWishlist } = useWishlist();
-
-  const wishlisted = isWishlisted(product._id);
-
+  const product = item.product;
   return (
     <div
       className="bg-white rounded-2xl overflow-hidden shadow hover:shadow-md transition-all duration-300 group animate-fade-in cursor-pointer"
@@ -32,7 +29,7 @@ function ProductCard({ product, priority = false }: Props) {
           src={product.image}
           alt={product.name}
           fill
-          priority={priority}
+          priority
           sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, 20vw"
           className="object-cover p-4 group-hover:p-2 transition-all duration-300"
         />
@@ -46,18 +43,14 @@ function ProductCard({ product, priority = false }: Props) {
         </div>
         <button
           type="button"
-          aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          aria-label="Remove from wishlist"
           onClick={(e) => {
             e.stopPropagation();
-            toggleWishlist(product._id);
+            onRemove();
           }}
-          className="absolute top-3 right-3 z-10 size-9 rounded-full bg-white shadow hover:bg-app-cream transition-colors flex-center"
+          className="absolute top-3 right-3 z-10 size-9 rounded-full bg-white shadow hover:bg-red-50 flex-center transition-colors text-gray-400 hover:text-red-500"
         >
-          <Heart
-            className={`size-5 transition-colors ${
-              wishlisted ? "fill-red-500 text-red-500" : "text-gray-500"
-            }`}
-          />
+          <Trash2Icon className="size-4" />
         </button>
       </div>
       {/* Info */}
@@ -95,15 +88,15 @@ function ProductCard({ product, priority = false }: Props) {
             )}
           </div>
           <button
-            aria-label="Add To Cart Button"
+            type="button"
+            aria-label="Move to Cart"
             onClick={(e) => {
               e.stopPropagation();
-              addToCart(product);
+              onMoveToCart();
             }}
-            type="button"
-            className="size-7 rounded-full bg-app-orange text-white flex-center shrink-0 hover:bg-app-orange-dark transition-colors active:scale-95"
+            className="size-8 rounded-full bg-app-orange text-white flex-center shrink-0 hover:bg-app-orange-dark transition-colors active:scale-95"
           >
-            <Plus className="size-3.5" />
+            <ShoppingCart className="size-4" />
           </button>
         </div>
       </div>
@@ -111,4 +104,4 @@ function ProductCard({ product, priority = false }: Props) {
   );
 }
 
-export default ProductCard;
+export default WishlistCard;
