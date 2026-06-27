@@ -1,21 +1,27 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { api } from "@/lib/api";
 import type { WishlistItem } from "@/types";
+import { useAuth } from "@/context/auth/useAuth";
 
 export function useWishlist() {
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
 
   // Load the current customer's wishlist.
-  const loadWishlist = async () => {
+  const loadWishlist = useCallback(async () => {
+    if (!user) {
+      setWishlist([]);
+      return;
+    }
     const data = await api<{
       success: boolean;
       wishlist: WishlistItem[];
     }>("/wishlist");
 
     setWishlist(data.wishlist);
-  };
+  }, [user]);
 
   const getProductId = (item: WishlistItem) =>
     typeof item.product === "string" ? item.product : item.product._id;
@@ -94,8 +100,16 @@ export function useWishlist() {
   };
 
   useEffect(() => {
+    if (authLoading) {
+      return;
+    }
     async function initializeWishlist() {
       try {
+        if (!user) {
+          setWishlist([]);
+          setLoading(false);
+          return;
+        }
         await loadWishlist();
       } catch (error) {
         console.error(error);
@@ -103,7 +117,7 @@ export function useWishlist() {
         const message =
           error instanceof Error
             ? error.message
-            : "Unable to initialize wishlist. Please try again.";
+            : "Unable to initialize wishlist.";
 
         toast.error(message);
       } finally {
@@ -112,7 +126,7 @@ export function useWishlist() {
     }
 
     initializeWishlist();
-  }, []);
+  }, [user, authLoading, loadWishlist]);
 
   return {
     wishlist,
