@@ -7,19 +7,18 @@ import { NextRequest } from "next/server";
 import { handleDeleteAddress } from "./handlers/deleteAddress";
 import { handleUpdateAddress } from "./handlers/updateAddress";
 
-// Dynamic route parameters from the URL.
-interface Params {
-  params: Promise<{
-    id: string;
-  }>;
-}
-
 // Updates a customer's saved address.
-export async function PUT(request: NextRequest, { params }: Params) {
-  return handleUpdateAddress(request, { params });
+export async function PUT(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
+  return handleUpdateAddress(request, context);
 }
 
 
-export async function DELETE(request: NextRequest, { params }: Params) {
-  return handleDeleteAddress(request, { params });
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
+  return handleDeleteAddress(request, context);
 }
