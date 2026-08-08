@@ -1,16 +1,16 @@
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/userAuth";
-import WishlistItem from "@/models/WishlistItem";
+import SaveForLaterItem from "@/models/SaveForLaterItem";
 import "@/models/Product";
 import { NextResponse } from "next/server";
 
-// Returns all wishlist items belonging to the current customer.
-export async function handleGetWishlist() {
+// Returns all save for later items belonging to the current customer.
+export async function handleGetAllSaveForLaterItems() {
   try {
     // DB connection
     await connectDB();
 
-    // Wishlist items are private and belong to a specific user.
+    // Save For Later items are private and belong to a specific user.
     const user = await getAuthUser();
     if (!user) {
       return NextResponse.json(
@@ -24,30 +24,29 @@ export async function handleGetWishlist() {
       );
     }
 
-    // Load only wishlist items owned by the current user.
-    const wishlist = await WishlistItem.find({
+    // Load only save for later items owned by the current user.
+    const saveForLater = await SaveForLaterItem.find({
       user: user._id,
-    })
-      // Replace product id with actual product details
+    }) // Replace product id with actual product details
       .populate({
         path: "product",
       })
-      // Show newest wishlisted items first
+      // Show newest save for later items first
       .sort({
         createdAt: -1,
       });
 
-    // Return customer's wishlist.
+    // Return customer's save for later.
     return NextResponse.json({
       success: true,
-      wishlist,
+      saveForLater,
     });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
       {
         success: false,
-        message: "Failed to fetch wishlist",
+        message: "Failed to fetch Save For Later",
       },
       {
         status: 500,

@@ -1,10 +1,10 @@
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/userAuth";
 import Product from "@/models/Product";
-import WishlistItem from "@/models/WishlistItem";
+import SaveForLaterItem from "@/models/SaveForLaterItem";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function handleCreateWishlistItem(request: NextRequest) {
+export async function handleCreateSaveForLaterItem(request: NextRequest) {
   try {
     await connectDB();
 
@@ -51,8 +51,8 @@ export async function handleCreateWishlistItem(request: NextRequest) {
       );
     }
 
-    // Prevent duplicate wishlist entries for the same product.
-    const existingItem = await WishlistItem.findOne({
+    // Prevent duplicate save for later item entries for the same product.
+    const existingItem = await SaveForLaterItem.findOne({
       user: user._id,
       product: productId,
     });
@@ -60,7 +60,7 @@ export async function handleCreateWishlistItem(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "Item already exists in wishlist",
+          message: "Item already exists in Save For Later",
         },
         // Conflict
         {
@@ -69,20 +69,20 @@ export async function handleCreateWishlistItem(request: NextRequest) {
       );
     }
 
-    const wishlistItem = await WishlistItem.create({
+    const saveForLaterItem = await SaveForLaterItem.create({
       user: user._id,
       product: productId,
     });
 
-    await wishlistItem.populate({
+    await saveForLaterItem.populate({
       path: "product",
     });
 
     return NextResponse.json(
       {
         success: true,
-        message: "Item added successfully to your wishlist",
-        wishlistItem,
+        message: "Item saved for later successfully.",
+        saveForLaterItem,
       },
       // Created
       {
@@ -94,7 +94,7 @@ export async function handleCreateWishlistItem(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        message: "Failed to add item to your wishlist",
+        message: "Failed to add item to Save For Later",
       },
       // Internal Server Error
       {
