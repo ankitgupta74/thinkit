@@ -21,7 +21,7 @@ export function SavedItemCard({
   onDelete,
 }: Props) {
   return (
-    <div className="flex gap-3 bg-white border border-app-border/40 rounded-xl p-3 overflow-hidden">
+    <div className="flex gap-3 bg-white border border-app-border/40 rounded-xl p-3 overflow-hidden transition-all duration-300">
       <Image
         src={product.image}
         alt={product.name}

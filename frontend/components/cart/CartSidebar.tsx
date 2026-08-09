@@ -11,7 +11,6 @@ import { CartEmptyState } from "./CartEmptyState";
 import { CartItemCard } from "./CartItemCard";
 import { SavedForLaterSection } from "./SavedForLaterSection";
 import { CartFooter } from "./CartFooter";
-import type { Product } from "@/types";
 
 
 function CartSidebar() {
@@ -103,7 +102,7 @@ function CartSidebar() {
                       transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                     >
                       <CartItemCard
-                        product={item.product as Product}
+                        product={item.product}
                         quantity={item.quantity}
                         isProcessing={processingId === item.product._id}
                         onUpdate={updateQuantity}

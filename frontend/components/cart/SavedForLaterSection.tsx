@@ -63,7 +63,7 @@ export function SavedForLaterSection({
         </h3>
         <motion.div
           animate={{ rotate: isSavedExpanded ? 180 : 0 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
           className="p-1 rounded-full group-hover:bg-app-cream text-app-text-light transition-colors"
         >
           <ChevronDown className="size-4" />
