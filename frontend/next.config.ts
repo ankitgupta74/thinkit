@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["10.91.169.63"],
   // Allow Next/Image to load images from trusted external sources.
   images: {
     remotePatterns: [
