@@ -32,7 +32,7 @@ export const autoAssignRider = inngest.createFunction(
     // Give the system a short delay before assigning a rider.
     // Useful if other order updates happen immediately after placement.
     console.log("Waiting 5 minutes before rider assignment...");
-    await step.sleep("wait-5-min", "300s");
+    await step.sleep("wait-1-min", "60s");
 
     console.log("5 minute wait completed");
 

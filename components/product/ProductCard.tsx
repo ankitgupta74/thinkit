@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Plus, Star, Heart } from "lucide-react";
+import { ShoppingCartIcon, Star, Heart } from "lucide-react";
 import { CURRENCY } from "@/utils/config";
 import { Product } from "@/types";
 import { useWishlist } from "@/context/wishlist/useWishlist";
@@ -103,7 +103,7 @@ function ProductCard({ product, priority = false }: Props) {
             type="button"
             className="size-7 rounded-full bg-app-orange text-white flex-center shrink-0 hover:bg-app-orange-dark transition-colors active:scale-95"
           >
-            <Plus className="size-3.5" />
+            <ShoppingCartIcon className="size-3.5" />
           </button>
         </div>
       </div>

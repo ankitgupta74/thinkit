@@ -137,15 +137,15 @@ function Footer() {
                 [
                   {
                     icon: MapPinIcon,
-                    text: "123 Green Valley Rd, Portland"
+                    text: "Kalyani, Nadia, West Bengal, India"
                   },
                   {
                     icon: PhoneIcon,
-                    text: "+1 (111) 123-4567"
+                    text: "+91 (743) 968-0877"
                   },
                   {
                     icon: MailIcon,
-                    text: "hello@example.com"
+                    text: "ankitgupta.connectmail@gmail.com"
                   },
                 ].map((item, i) => {
                   const Icon = item.icon;
@@ -162,7 +162,7 @@ function Footer() {
         {/* Bottom */}
         <div className="border-t border-white/10 mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs text-white/50">
-            © 2026 DarkKnight. All rights reserved.
+            © 2026 Ankit Gupta. All rights reserved.
           </p>
           <div className="flex gap-4">
             {

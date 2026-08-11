@@ -5,16 +5,18 @@ import { createPortal } from "react-dom";
 export function CartTooltip({
   text,
   children,
+  className = "",
 }: {
   text: string;
   children: React.ReactNode;
+  className?: string;
 }) {
   const [show, setShow] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0 });
 
   return (
     <div
-      className="relative flex items-center justify-center"
+      className={`relative flex items-center justify-center ${className}`}
       onMouseEnter={(e) => {
         const r = e.currentTarget.getBoundingClientRect();
         setPos({ top: r.bottom + 8, left: r.right });
