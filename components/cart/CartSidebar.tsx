@@ -53,7 +53,7 @@ function CartSidebar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[1000]"
             onClick={() => setIsCartOpen(false)}
           />
           <motion.div
@@ -65,7 +65,7 @@ function CartSidebar() {
               damping: 28,
               stiffness: 200,
             }}
-            className="fixed right-0 top-0 h-[100dvh] w-full sm:max-w-md bg-white z-50 shadow-2xl flex flex-col"
+            className="fixed right-0 top-0 h-[100dvh] w-full sm:max-w-md bg-white z-[1001] shadow-2xl flex flex-col"
           >
             <CartHeader
               count={items.length}

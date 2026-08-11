@@ -1,19 +1,10 @@
 "use client";
 
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-  useMap
-} from "react-leaflet";
-
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-
 import { MapPinIcon } from "lucide-react";
 import L from "leaflet";
 import { useEffect, useMemo, useRef } from "react";
-
 import { Order } from "@/types";
 import { iconsForLeafpad } from "@/public/assets";
 import { LiveLocation } from "@/types/liveLocation";
@@ -22,17 +13,11 @@ function MapUpdater({ center }: { center: [number, number] }) {
   const map = useMap();
 
   useEffect(() => {
-    // React state changes do not automatically move Leaflet map camera.
-    // So whenever center changes, manually shift the map view.
-    // Think of this like: "driver moved → move camera too".
     map.flyTo(center, map.getZoom(), {
       animate: true,
       duration: 1,
     });
   }, [center, map]);
-
-  // This component exists only for side effects.
-  // No UI needed, only map behavior update.
   return null;
 }
 
@@ -42,9 +27,7 @@ export default function LiveMap({
 }: {
   order: Order;
   liveLocation: LiveLocation | null;
-  }) {
-  // Store the actual Leaflet map instance.
-  // useRef keeps value between renders without causing re-renders.
+}) {
   const mapRef = useRef<L.Map | null>(null);
 
   const truckIcon = useMemo(
@@ -56,8 +39,6 @@ export default function LiveMap({
       }),
     [],
   );
-  // Create icon only once.
-  // Without useMemo, every render creates a new icon object unnecessarily.
 
   const destinationIcon = useMemo(
     () =>
@@ -68,12 +49,8 @@ export default function LiveMap({
       }),
     [],
   );
-  // Same idea here: create once and reuse instead of rebuilding repeatedly.
 
   useEffect(() => {
-    // Safety cleanup:
-    // remove map instance when component leaves screen.
-    // Prevents duplicate maps or memory issues.
     return () => {
       if (mapRef.current) {
         mapRef.current.remove();
@@ -82,32 +59,25 @@ export default function LiveMap({
     };
   }, []);
 
-  // No need to show tracking after delivery flow is finished.
   if (order.status === "Delivered" || order.status === "Cancelled") {
     return null;
   }
 
-  const center: [number, number] = liveLocation?.lat
-    ? [liveLocation.lat, liveLocation.lng]
-    : [order.shippingAddress.lat, order.shippingAddress.lng];
-  // Priority:
-  // Live truck location → use it, Otherwise fallback to delivery address
-  // Rule to remember: Always keep a backup location for maps.
+  const center: [number, number] =
+    liveLocation?.lat != null && liveLocation?.lng != null
+      ? [liveLocation.lat, liveLocation.lng]
+      : [order.shippingAddress.lat, order.shippingAddress.lng];
 
-  if (!center[0] || !center[1]) {
+  if (center[0] == null || center[1] == null) {
     return (
       <div className="h-70 bg-app-green/5 flex-center rounded-2xl">
-        {/* Show simple placeholder if map coordinates are unavailable */}
         <MapPinIcon />
       </div>
     );
   }
 
   return (
-    <div
-      className="rounded-2xl overflow-hidden border border-app-border"
-      style={{ height: 280 }}
-    >
+    <div className="relative z-0 h-60 sm:h-70 rounded-2xl overflow-hidden border border-app-border">
       <MapContainer
         ref={mapRef}
         center={center}
@@ -125,7 +95,6 @@ export default function LiveMap({
             position={[liveLocation.lat, liveLocation.lng]}
             icon={truckIcon}
           >
-            {/* Current live location of delivery person */}
             <Popup>Delivery Partner</Popup>
           </Marker>
         )}
@@ -134,11 +103,9 @@ export default function LiveMap({
           position={[order.shippingAddress.lat, order.shippingAddress.lng]}
           icon={destinationIcon}
         >
-          {/* Final place where order should arrive */}
           <Popup>Delivery Address</Popup>
         </Marker>
 
-        {/* Keeps map camera synced with changing live coordinates */}
         <MapUpdater center={center} />
       </MapContainer>
     </div>

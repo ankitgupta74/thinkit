@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/userAuth";
 import Order from "@/models/Order";
+import "@/models/DeliveryPartner";
 
 export async function handleGetUserOrders() {
   try {

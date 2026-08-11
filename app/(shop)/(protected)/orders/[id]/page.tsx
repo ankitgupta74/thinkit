@@ -42,8 +42,8 @@ function Order() {
   }
 
   return (
-    <div className="min-h-screen mb-20 bg-app-cream">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen mb-20 bg-app-cream overflow-x-hidden">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8">
         {/* Header */}
         <button
           type="button"
@@ -53,7 +53,7 @@ function Order() {
           <ArrowLeftIcon className="size-4" /> Back to Orders
         </button>
         {/* Order Id, Date and Status */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
           <div className="">
             <h1 className="text-2xl font-semibold text-app-green">
               Order #{order._id.slice(-8).toUpperCase()}
@@ -76,7 +76,7 @@ function Order() {
         {/*  */}
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Side - Timeline, Map Area */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-6 min-w-0">
             {/* OTP Card */}
             <OrderOTP order={order} />
             {/* Live Tracking Map */}
@@ -116,14 +116,14 @@ function Order() {
               )}
           </div>
           {/* Right Side - Order details */}
-          <div className="space-y-5">
+          <div className="space-y-5 min-w-0">
             {/* Delivery Address */}
             <div className="bg-white rounded-2xl p-5">
               <h3 className="text-sm font-semibold text-app-green mb-3 flex items-center gap-2">
                 <MapPinIcon className="size-4" />
                 Delivery Address
               </h3>
-              <p className="text-sm text-app-text-light leading-relaxed">
+              <p className="text-sm text-app-text-light leading-relaxed break-words">
                 {order.shippingAddress.label}
                 <br />
                 {order.shippingAddress.address}
