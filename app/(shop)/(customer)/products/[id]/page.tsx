@@ -9,7 +9,7 @@ import { useWishlist } from "@/context/wishlist/useWishlist";
 import { useProductDetails } from "@/hooks/useProductDetails";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import Loader from "@/components/ui/Loader";
-import DummyReviewsSection from "@/components/ui/DummyReviewsSection";
+import ReviewsSection from "@/components/product/ReviewsSection";
 import RecentlyViewedSection from "@/components/product/RecentlyViewedSection";
 import ProductBreadcrumbs from "@/components/product/ProductBreadcrumbs";
 import ProductImageSection from "@/components/product/ProductImageSection";
@@ -88,7 +88,6 @@ function Product() {
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
       >
-
         {/* Breadcrumbs */}
         <ProductBreadcrumbs
           category={product.category}
@@ -108,7 +107,6 @@ function Product() {
         {/* Product Details Section */}
         <div className="bg-white/50 rounded-2xl overflow-hidden">
           <div className="grid md:grid-cols-2 gap-0">
-
             {/* Left Side - Image */}
             <ProductImageSection
               image={product.image}
@@ -157,7 +155,7 @@ function Product() {
         </div>
 
         {/* Customer Reviews Section */}
-        {product.reviewCount > 0 && <DummyReviewsSection product={product} />}
+        <ReviewsSection product={product} />
 
         {/* Related Products Section */}
         <RelatedProductsSection

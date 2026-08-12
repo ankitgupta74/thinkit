@@ -17,10 +17,9 @@ function ProductInfo({ product, categoryLabel }: Props) {
         {product.name}
       </h1>
       {/* Rating */}
-      {product.rating > 0 && (
+      {product.reviewCount > 0 ? (
         <div className="flex items-center gap-2 mb-5">
           <div className="flex items-center gap-0.5">
-            {/* Create 5 stars and fill only required amount */}
             {[1, 2, 3, 4, 5].map((star) => (
               <StarIcon
                 key={star}
@@ -31,6 +30,20 @@ function ProductInfo({ product, categoryLabel }: Props) {
           <span className="text-sm font-medium">{product.rating}</span>
           <span className="text-sm text-app-text-light">
             ({product.reviewCount} reviews)
+          </span>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 mb-5">
+          <div className="flex items-center gap-0.5">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <StarIcon
+                key={star}
+                className="w-4 h-4 text-black opacity-50"
+              />
+            ))}
+          </div>
+          <span className="text-sm text-app-text-light italic">
+            No reviews yet
           </span>
         </div>
       )}
